@@ -13,7 +13,7 @@ class AcaoBusiness(val acaoConfig: AcaoConfig) {
 
     fun getAnalise(ticker: String): Mono<AnaliseAcaoDto> {
 
-        val pageProps = AcaoWebClient.getContentFromAPI(ticker)
+        val pageProps = AcaoWebClient.getContentFromAPI(acaoConfig.url, acaoConfig.timeout.toLong(), ticker)
 
         val indicatorsTocker = pageProps["indicatorsTicker"] as Map<String, Objects>
         val precoSobreValorPatrimonial = if(indicatorsTocker.get("pvp").toString().equals("-")) 0.00 else indicatorsTocker.get("pvp").toString().replace(",", ".").replace("%", "").toDouble()

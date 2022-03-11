@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
-@ConfigurationProperties(prefix = "config.business")
+@ConfigurationProperties(prefix = "config")
 class AcaoConfig{
     lateinit var minimoFreeFloat: String
     lateinit var minimoROE: String
@@ -15,4 +15,6 @@ class AcaoConfig{
     lateinit var maximoDividaLiquidaSobreEbitda: String
     lateinit var maximoPrecoSobreLucro: String
     lateinit var maximoPrecoSobreValorPatrimonial: String
+    lateinit var url: String
+    lateinit var timeout: String
 }

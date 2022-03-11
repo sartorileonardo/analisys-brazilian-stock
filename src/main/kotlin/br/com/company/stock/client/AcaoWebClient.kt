@@ -13,13 +13,13 @@ import java.util.*
 class AcaoWebClient {
 
     companion object {
-        fun getResponse(urlSite: String): HttpResponse<String> {
+        fun getResponse(urlSite: String, timeoutMinutes: Long): HttpResponse<String> {
             val httpClient: HttpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build()
             val httpRequest: HttpRequest = HttpRequest.newBuilder()
                 .uri(URI(urlSite))
                 .version(HttpClient.Version.HTTP_2)
                 .GET()
-                .timeout(Duration.ofMinutes(1))
+                .timeout(Duration.ofMinutes(timeoutMinutes))
                 .build()
             val httpResponse: HttpResponse<String> = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString())
             when(httpResponse.statusCode()){
@@ -29,10 +29,10 @@ class AcaoWebClient {
             return httpResponse
         }
 
-        fun getContentFromAPI(ticker: String): Map<String, Objects> {
-            val urlSite = "https://MY_API/acoes/${ticker.toLowerCase()}/"
+        fun getContentFromAPI(url: String, timeoutMinutes: Long, ticker: String): Map<String, Objects> {
+            val urlApiExterna = "${url}${ticker.toLowerCase()}/"
             val props = ObjectMapper().readValue(
-                getResponse(urlSite)
+                getResponse(urlApiExterna, timeoutMinutes)
                     .body().substringAfter("<script id=\"__NEXT_DATA__\" type=\"application/json\">", "</script>"), Map::class.java).get("props") as Map<String, Objects>
             val pageProps = props["pageProps"] as Map<String, Objects>
             return pageProps
