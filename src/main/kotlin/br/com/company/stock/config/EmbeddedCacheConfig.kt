@@ -17,26 +17,9 @@ class EmbeddedCacheConfig(
     @Autowired
     val cacheManager: CacheManager
 ) {
-
-
-    //TODO: Realizar a implementação correta para configurar o tempo de validade do cache
-    /*
-    @Bean
-    fun config(): Config {
-        val config = Config()
-        val mapConfig = MapConfig()
-        mapConfig.setTimeToLiveSeconds(10)
-        config.getMapConfigs().put("analise", mapConfig);
-        return Config()
-    }
-
-     */
-    //3 Days os cache
     @Scheduled(fixedRate = 300000000)
     fun clearCache(){
         cacheManager.getCache("analise")?.clear()
     }
-
-
 
 }

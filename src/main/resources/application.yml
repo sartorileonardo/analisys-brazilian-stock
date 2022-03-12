@@ -9,5 +9,5 @@ config:
    maximoPrecoSobreLucro: 15.00
    maximoPrecoSobreValorPatrimonial: 3.00
 
-   url: "<API_URL>"
+   url: "<URL_API>"
    timeout: 1
