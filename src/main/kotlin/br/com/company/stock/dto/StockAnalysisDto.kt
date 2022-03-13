@@ -1,6 +1,6 @@
 package br.com.company.stock.dto
 
-data class AnaliseAcaoDto(
+data class StockAnalysisDto(
     val estaEmSetorPerene: Boolean,
     val estaForaDeRecuperacaoJudicial: Boolean,
     val possuiBomNivelFreeFloat: Boolean,

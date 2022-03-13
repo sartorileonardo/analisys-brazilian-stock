@@ -10,7 +10,7 @@ import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.*
 
-class AcaoWebClient {
+class StockWebClient {
 
     companion object {
         fun getResponse(urlSite: String, timeoutMinutes: Long): HttpResponse<String> {

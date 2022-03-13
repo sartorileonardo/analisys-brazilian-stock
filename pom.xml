@@ -8,11 +8,11 @@
 		<version>2.4.4</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>br.com.alura</groupId>
+	<groupId>br.com.company.stock</groupId>
 	<artifactId>stock</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>stock</name>
-	<description>Demo project for Spring Boot with ReactiveMongoDB</description>
+	<description>Stock Analisys with Kotlin/Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
 		<kotlin.version>1.4.31</kotlin.version>

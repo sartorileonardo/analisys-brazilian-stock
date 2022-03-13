@@ -1,20 +1,24 @@
 package br.com.company.stock.business
 
-import br.com.company.stock.client.AcaoWebClient
-import br.com.company.stock.config.AcaoConfig
-import br.com.company.stock.dto.AnaliseAcaoDto
+import br.com.company.stock.client.StockWebClient
+import br.com.company.stock.config.StockParametersApiConfig
+import br.com.company.stock.dto.StockAnalysisDto
+import br.com.company.stock.exception.BusinessException
 import io.netty.util.internal.StringUtil
 import org.springframework.stereotype.Component
+import org.springframework.util.ObjectUtils
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import java.util.*
 
 @Component
-class AcaoBusiness(val acaoConfig: AcaoConfig) {
+class StockBusiness(val acaoConfig: StockParametersApiConfig) {
 
-    fun getAnalise(ticker: String): Mono<AnaliseAcaoDto> {
+    fun getAnalise(ticker: String): Mono<StockAnalysisDto> {
 
-        val pageProps = AcaoWebClient.getContentFromAPI(acaoConfig.url, acaoConfig.timeout.toLong(), ticker)
+        validarTicker(ticker)
+
+        val pageProps = StockWebClient.getContentFromAPI(acaoConfig.url, acaoConfig.timeout.toLong(), ticker)
 
         val indicatorsTicker = pageProps["indicatorsTicker"] as Map<String, Objects>
         val precoSobreValorPatrimonial = extrairDouble(indicatorsTicker.get("pvp").toString())
@@ -32,7 +36,7 @@ class AcaoBusiness(val acaoConfig: AcaoConfig) {
         val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company.get("dividaliquida_PatrimonioLiquido").toString())
         val dividaLiquidaSobreEbitda = extrairDouble(company.get("dividaLiquida_Ebit").toString())
 
-        return AnaliseAcaoDto(
+        return StockAnalysisDto(
             estaEmSetorPerene(setorAtuacaoClean),
             estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
             possuiBomNivelFreeFloat(freeFloat),
@@ -44,6 +48,18 @@ class AcaoBusiness(val acaoConfig: AcaoConfig) {
             possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
             possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial)
         ).toMono()
+    }
+
+    private fun validarTicker(ticker: String) {
+        if(ObjectUtils.isEmpty(ticker)){
+            throw BusinessException("Ticker é obrigatório!")
+        }
+        if(ticker.trim().length < 5 || ticker.trim().length > 6){
+            throw BusinessException("Ticker deve ter entre 5 e 6 caracteres!")
+        }
+        if(ticker.trim().matches(Regex("\\d+"))){
+            throw BusinessException("Ticker não pode ser somente numeros!")
+        }
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double): Boolean = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1

@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "config")
-class AcaoConfig{
+class StockParametersApiConfig{
     lateinit var minimoFreeFloat: String
     lateinit var minimoROE: String
     lateinit var minimoCagrLucro5anos: String

@@ -24,14 +24,14 @@ class HandlerException {
         )
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException::class)
+    @ExceptionHandler(BusinessException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleValidation(
-        exception: MethodArgumentNotValidException,
+        exception: BusinessException,
         request: HttpServletRequest): ErrorDto {
         return ErrorDto(
-            status = HttpStatus.NOT_FOUND.value(),
-            error = HttpStatus.NOT_FOUND.name,
+            status = HttpStatus.BAD_REQUEST.value(),
+            error = HttpStatus.BAD_REQUEST.name,
             message = exception.message,
             path = request.servletPath
         )
