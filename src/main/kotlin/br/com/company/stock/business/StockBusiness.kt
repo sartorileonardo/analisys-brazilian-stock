@@ -40,8 +40,8 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
             estaEmSetorPerene(setorAtuacaoClean),
             estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
             possuiBomNivelFreeFloat(freeFloat),
-            possuiBomNivelROE(roe),
-            possuiBomNivelCAGRLucro(cagrLucro),
+            possuiBomNivelRetornoSobrePatrimonio(roe),
+            possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
             possuiBomNivelMargemLiquida(margemLiquida),
             possuiBomNivelLiquidez(liquidezCorrente),
             possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
@@ -60,13 +60,16 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
         if(ticker.trim().matches(Regex("\\d+"))){
             throw BusinessException("Ticker não pode ser somente numeros!")
         }
+        if(ticker.trim().matches(Regex("^[a-zA-Z]+\$"))){
+            throw BusinessException("Ticker não pode ser somente letras!")
+        }
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double): Boolean = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
 
-    private fun possuiBomNivelCAGRLucro(cagr: Double): Boolean = cagr.compareTo(acaoConfig.minimoCagrLucro5anos.toDouble()) >= 1
+    private fun possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagr: Double): Boolean = cagr.compareTo(acaoConfig.minimoCagrLucro5anos.toDouble()) >= 1
 
-    private fun possuiBomNivelROE(roe: Double): Boolean = roe.compareTo(acaoConfig.minimoROE.toDouble()) >= 1
+    private fun possuiBomNivelRetornoSobrePatrimonio(roe: Double): Boolean = roe.compareTo(acaoConfig.minimoROE.toDouble()) >= 1
 
     private fun estaEmSetorPerene(setorDeOperacao: String): Boolean = arrayListOf("utilidade-publica", "materiais-basicos", "saude", "financeiro-e-outros").contains(setorDeOperacao)
 
