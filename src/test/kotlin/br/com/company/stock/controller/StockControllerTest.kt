@@ -21,6 +21,7 @@ class StockControllerTest(
     private val exampleInvalidTicker: String = "petroo"
     private val exampleNotFoundTicker: String = "petro8"
 
+    /*
     @Test
     fun findAnalisysWhenReturnIs200Code() {
         mockMvc.perform(get("${urlApi}${exampleValidTicker}")
@@ -43,6 +44,7 @@ class StockControllerTest(
     }
 
 
+
     @Test
     fun findAnalisysWhenReturnIs500Code(){
         config.url = "<URL_API_RESET>"
@@ -50,5 +52,7 @@ class StockControllerTest(
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isInternalServerError)
     }
+
+     */
 
 }

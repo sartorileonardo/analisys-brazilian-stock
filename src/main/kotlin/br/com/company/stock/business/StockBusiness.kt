@@ -20,10 +20,13 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
 
         val pageProps = StockWebClient.getContentFromAPI(acaoConfig.url, acaoConfig.timeout.toLong(), ticker)
 
+        //TODO: Adicionar segurança ao cast de map, para realizar o cast somente quando o map tiver a chave e quando não for null seu valor
         val indicatorsTicker = pageProps["indicatorsTicker"] as Map<String, Objects>
+
         val precoSobreValorPatrimonial = extrairDouble(indicatorsTicker.get("pvp").toString())
         val precoSobreLucro = extrairDouble(indicatorsTicker.get("preco_lucro").toString())
 
+        //TODO: Adicionar segurança ao cast de map, para realizar o cast somente quando o map tiver a chave e quando não for null seu valor
         val company = pageProps.get("company") as Map<String, Objects>
 
         val freeFloat = extrairDouble(company.get("percentual_AcoesFreeFloat").toString())
@@ -63,6 +66,7 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
         if(ticker.trim().matches(Regex("^[a-zA-Z]+\$"))){
             throw BusinessException("Ticker não pode ser somente letras!")
         }
+        //TODO: Adicionar validação para aceitar somente ticker com final 3, 4 e 11
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double): Boolean = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
