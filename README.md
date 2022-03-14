@@ -44,5 +44,8 @@ spring:
 ## Run Application
 `mvn spring-boot:run`
 
+## Swagger Documentation
+http://localhost:8888/swagger-ui/index.html#
+
 ## Postman
 ><code>[postman/postman_collection.json](postman/postman_collection.json)</code>

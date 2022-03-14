@@ -42,6 +42,7 @@ class StockControllerTest(
             .andExpect(status().isNotFound)
     }
 
+
     @Test
     fun findAnalisysWhenReturnIs500Code(){
         config.url = "<URL_API_RESET>"
