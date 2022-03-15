@@ -7,7 +7,7 @@ data class StockAnalysisDto(
     val possuiBomNivelRetornoSobrePatrimonio: Boolean,
     val possuiBomNivelCrescimentoLucroNosUltimos5Anos: Boolean,
     val possuiBomNivelMargemLiquida: Boolean,
-    val possuiBomNivelLiquidez: Boolean,
+    val possuiBomNivelLiquidezCorrente: Boolean,
     val possuiBomNivelDividaLiquidaSobrePatrimonioLiquido: Boolean,
     val possuiBomNivelDividaLiquidaSobreEbitda: Boolean,
     val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean

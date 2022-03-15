@@ -46,7 +46,7 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
             possuiBomNivelRetornoSobrePatrimonio(roe),
             possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
             possuiBomNivelMargemLiquida(margemLiquida),
-            possuiBomNivelLiquidez(liquidezCorrente),
+            possuiBomNivelLiquidezCorrente(liquidezCorrente),
             possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
             possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
             possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial)
@@ -85,7 +85,7 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
 
     private fun estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial: Boolean) = !estaEmRecuperacaoJudicial
 
-    private fun possuiBomNivelLiquidez(liquidezCorrente: Double): Boolean = liquidezCorrente.compareTo(1.00) >= 1
+    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double): Boolean = liquidezCorrente.compareTo(1.00) >= 1
 
     private fun possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro: Double, precoSobreValorPatrimonial: Double): Boolean = possuiBomNivelPrecoSobreLucro(precoSobreLucro) && possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial)
 
@@ -93,6 +93,6 @@ class StockBusiness(val acaoConfig: StockParametersApiConfig) {
 
     private fun possuiBomNivelPrecoSobreLucro(precoSobreLucro: Double): Boolean = precoSobreLucro.compareTo(0.00) >= 1 && precoSobreLucro in 0.10 .. acaoConfig.maximoPrecoSobreLucro.toDouble()
 
-    private fun extrairDouble(texto: String): Double = if(!StringUtil.isNullOrEmpty(texto) || texto.equals("-")) 0.00 else texto.trim().replace(",", ".").replace("%", "").toDouble()
+    private fun extrairDouble(texto: String): Double = if(StringUtil.isNullOrEmpty(texto) || texto.equals("-")) 0.00 else texto.trim().replace(",", ".").replace("%", "").toDouble()
 
 }
