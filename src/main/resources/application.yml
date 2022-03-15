@@ -9,7 +9,7 @@ config:
    maximoPrecoSobreLucro: 15.00
    maximoPrecoSobreValorPatrimonial: 3.00
 
-   url: "https://www.suno.com.br/acoes/"
+   url: "<URL_API>"
    timeout: 1
 
 server:
