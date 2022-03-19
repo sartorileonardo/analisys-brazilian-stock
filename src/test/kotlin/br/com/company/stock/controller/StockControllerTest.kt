@@ -1,6 +1,5 @@
 package br.com.company.stock.controller
 
-import br.com.company.stock.config.StockParametersApiConfig
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
@@ -12,9 +11,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class StockControllerTest(
-    @Autowired val mockMvc: MockMvc
-    ) {
+class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     private val urlValidApi: String = "/stock/analisys/"
     private val urlInvalidApi: String = "/stock/analisys/ticker"
     private val exampleValidTicker: String = "ABEV3"
