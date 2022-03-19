@@ -1,65 +1,16 @@
-# spring-boot-brazilian-stock-analisys
+package br.com.company.stock.service
 
-> Spring boot with Kotlin, Spring Boot, Cache, WebClient, Swagger and Heroku Cloud
+import br.com.company.stock.client.StockWebClient
+import br.com.company.stock.config.StockParametersApiConfig
+import br.com.company.stock.controller.dto.StockAnalysisDto
+import br.com.company.stock.validation.TickerValidation
+import io.netty.util.internal.StringUtil
+import org.springframework.cache.annotation.CacheConfig
+import org.springframework.cache.annotation.Cacheable
+import org.springframework.stereotype.Service
+import reactor.core.publisher.Mono
+import java.util.*
 
-## Run Application
-`mvn spring-boot:run`
-
-## Swagger localhost documentation
-http://localhost:8888/swagger-ui/index.html#
-
-## Swagger heroku documentation
-https://analisys-brazilian-stock.herokuapp.com/swagger-ui/index.html#
-
-## Postman
-><code>[postman/postman_collection.json](postman/postman_collection.json)</code>
-
-## application.yml
-
-```yaml
-config:
-  setoresParenes: [
-    "utilidade-publica",
-    "materiais-basicos",
-    "financeiro-e-outros",
-    "saude"]
-  minimoFreeFloat: 25.00
-  minimoROE: 10.00
-  minimoCagrLucro5anos: 15.00
-  minimoMargemLiquida: 10.00
-  minimoLiquidez: 2.00
-  maximoDividaLiquidaSobrePatrimonioLiquido: 2.00
-  maximoDividaLiquidaSobreEbitda: 2.50
-  maximoPrecoSobreLucro: 15.00
-  maximoPrecoSobreValorPatrimonial: 3.00
-
-  url: "https://www.suno.com.br/acoes/"
-  timeout: 1
-
-server:
-  port: 8888
-
-```
-
-## StockAnalisysDto.java
-```kotlin
-data class StockAnalysisDto(
-    val estaEmSetorPerene: Boolean,
-    val estaForaDeRecuperacaoJudicial: Boolean,
-    val possuiBomNivelFreeFloat: Boolean,
-    val possuiBomNivelRetornoSobrePatrimonio: Boolean,
-    val possuiBomNivelCrescimentoLucroNosUltimos5Anos: Boolean,
-    val possuiBomNivelMargemLiquida: Boolean,
-    val possuiBomNivelLiquidezCorrente: Boolean,
-    val possuiBomNivelDividaLiquidaSobrePatrimonioLiquido: Boolean,
-    val possuiBomNivelDividaLiquidaSobreEbitda: Boolean,
-    val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean
-)
-```
-
-
-## StockService.java
-```kotlin
 @CacheConfig(cacheNames = ["analise"])
 @Service
 class StockService(val acaoConfig: StockParametersApiConfig) {
@@ -130,22 +81,3 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
             .replace("%", "")
             .toDouble()
 }
-```
-
-## StockController.java
-```kotlin
-@CrossOrigin(origins = ["*"])
-@RestController
-@RequestMapping("/stock")
-@Api(description = "Analise de empresa brasileira de capital aberto")
-class StockController @Autowired constructor(val service: StockService){
-    @GetMapping("/analisys/{ticker}")
-    fun getAnalisys(@PathVariable ticker: String) = service.getAnalisys(ticker)
-}
-```
-
-## StockControllerTest.java
-```kotlin
-
-```
-

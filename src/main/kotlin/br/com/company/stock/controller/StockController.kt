@@ -1,19 +1,15 @@
 package br.com.company.stock.controller
 
-import br.com.company.stock.dto.StockAnalysisDto
-import br.com.company.stock.service.AcaoService
+import br.com.company.stock.service.StockService
 import io.swagger.annotations.Api
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
-import reactor.core.publisher.Mono
 
 @CrossOrigin(origins = ["*"])
 @RestController
 @RequestMapping("/stock")
 @Api(description = "Analise de empresa brasileira de capital aberto")
-class StockController @Autowired constructor(val service: AcaoService){
-    @GetMapping("/data/{ticker}")
-    fun getAnalise(@PathVariable ticker: String): Mono<StockAnalysisDto> {
-        return service.getAnalise(ticker)
-    }
+class StockController @Autowired constructor(val service: StockService){
+    @GetMapping("/analisys/{ticker}")
+    fun getAnalisys(@PathVariable ticker: String) = service.getAnalisys(ticker)
 }

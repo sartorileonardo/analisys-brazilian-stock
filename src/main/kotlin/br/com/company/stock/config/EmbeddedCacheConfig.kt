@@ -19,5 +19,4 @@ class EmbeddedCacheConfig(
     fun clearCache(){
         cacheManager.getCache("analise")?.clear()
     }
-
 }

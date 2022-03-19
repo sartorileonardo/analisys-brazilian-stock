@@ -1,4 +1,4 @@
-package br.com.company.stock.dto
+package br.com.company.stock.controller.dto
 
 data class StockAnalysisDto(
     val estaEmSetorPerene: Boolean,
