@@ -17,7 +17,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
     @Cacheable(value = ["analise"])
     fun getAnalisys(ticker: String): Mono<StockAnalysisDto> {
 
-        TickerValidation().validarTicker(ticker)
+        TickerValidation().validarTicker(ticker.trim())
 
         val pageProps = StockWebClient.getContentFromAPI(acaoConfig.url, acaoConfig.timeout.toLong(), ticker)
         val indicatorsTicker = pageProps.getOrDefault("indicatorsTicker", emptyMap<String, Objects>()) as Map<*, *>
