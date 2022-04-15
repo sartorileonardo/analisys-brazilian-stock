@@ -18,4 +18,9 @@ class StockParametersApiConfig{
     lateinit var maximoPrecoSobreValorPatrimonial: String
     lateinit var url: String
     lateinit var timeout: String
+    lateinit var timeMinRetry: String
+    lateinit var timeMaxRetry: String
+    lateinit var maxAttempsRetry: String
+    lateinit var messageTickerNotFound: String
+    lateinit var messageConnectionFail: String
 }

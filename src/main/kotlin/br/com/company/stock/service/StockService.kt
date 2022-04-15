@@ -19,7 +19,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
 
         TickerValidation().validarTicker(ticker.trim())
 
-        val pageProps = StockWebClient.getContentFromAPI(acaoConfig.url, acaoConfig.timeout.toLong(), ticker)
+        val pageProps = StockWebClient(acaoConfig, ticker).getContentFromAPI()
         val indicatorsTicker = pageProps.getOrDefault("indicatorsTicker", emptyMap<String, Objects>()) as Map<*, *>
         val precoSobreValorPatrimonial = extrairDouble(indicatorsTicker["pvp"].toString())
         val precoSobreLucro = extrairDouble(indicatorsTicker["preco_lucro"].toString())

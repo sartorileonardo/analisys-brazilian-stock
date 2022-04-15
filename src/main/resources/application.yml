@@ -16,6 +16,12 @@ config:
 
    url: "https://www.suno.com.br/acoes/"
    timeout: 1
+   timeMinRetry: 2000
+   timeMaxRetry: 5000
+   maxAttempsRetry: 3
+
+   messageTickerNotFound: "Sorry, the ticker not found!"
+   messageConnectionFail: "Sorry, the connection whith external API is fail. Retry again after 1 minute!"
 
 server:
    port: 8888
