@@ -15,7 +15,6 @@ import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.*
 
-@Component
 class StockWebClient(
     private val config: StockParametersApiConfig,
     private val ticker: String
