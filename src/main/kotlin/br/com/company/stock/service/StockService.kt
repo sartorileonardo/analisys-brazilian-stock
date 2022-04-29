@@ -20,9 +20,16 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
         TickerValidation().validarTicker(ticker.trim())
 
         val pageProps = StockWebClient(acaoConfig, ticker).getContentFromAPI()
-        val indicatorsTicker = pageProps.getOrDefault("indicatorsTicker", emptyMap<String, Objects>()) as Map<*, *>
-        val precoSobreValorPatrimonial = extrairDouble(indicatorsTicker["pvp"].toString())
-        val precoSobreLucro = extrairDouble(indicatorsTicker["preco_lucro"].toString())
+        val indicatorsTicker = pageProps.getOrDefault("indicatorsTicker", emptyMap<String, Objects>()) as Map<String, Object>
+        val valuation = pageProps.get("valuation") as Map<*,*>
+        val paper = pageProps.get("paper") as Map<*,*>
+        val indicadoresAlternativos = paper.get("indicadores") as ArrayList<*>
+        val indicadorAlternativoPL = indicadoresAlternativos[0] as Map<*, *>
+        val precoSobreLucroAlternativo = indicadorAlternativoPL.get("Value")
+        val indicadorAlternativoPVP = indicadoresAlternativos[1] as Map<*, *>
+        val pvp = indicadorAlternativoPVP.get("Value")
+        val precoSobreValorPatrimonial = if(indicatorsTicker.containsValue(null)) extrairDouble(pvp.toString()) else extrairDouble(valuation["pvp"].toString())
+        val precoSobreLucro = if(indicatorsTicker.containsValue(null)) extrairDouble(precoSobreLucroAlternativo.toString()) else extrairDouble(indicatorsTicker["preco_lucro"].toString())
         val company = pageProps.getOrDefault("company", emptyMap<String, Objects>()) as Map<*, *>
 
         val freeFloat = extrairDouble(company["percentual_AcoesFreeFloat"].toString())
