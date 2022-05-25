@@ -1,5 +1,6 @@
 package br.com.company.stock.service
 
+import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.client.StockWebClient
 import br.com.company.stock.config.StockParametersApiConfig
 import br.com.company.stock.controller.dto.StockAnalysisDto
@@ -9,7 +10,6 @@ import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
-import java.util.*
 
 @CacheConfig(cacheNames = ["analise"])
 @Service
@@ -19,28 +19,26 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
 
         TickerValidation().validarTicker(ticker.trim())
 
-        val pageProps = StockWebClient(acaoConfig, ticker).getContentFromAPI()
-        val indicatorsTicker = pageProps.getOrDefault("indicatorsTicker", emptyMap<String, Objects>()) as Map<String, Object>
-        val valuation = pageProps.get("valuation") as Map<*,*>
-        val paper = pageProps.get("paper") as Map<*,*>
-        val indicadoresAlternativos = paper.get("indicadores") as ArrayList<*>
-        val indicadorAlternativoPL = indicadoresAlternativos[0] as Map<*, *>
-        val precoSobreLucroAlternativo = indicadorAlternativoPL.get("Value")
-        val indicadorAlternativoPVP = indicadoresAlternativos[1] as Map<*, *>
-        val pvp = indicadorAlternativoPVP.get("Value")
-        val precoSobreValorPatrimonial = if(indicatorsTicker.containsValue(null)) extrairDouble(pvp.toString()) else extrairDouble(valuation["pvp"].toString())
-        val precoSobreLucro = if(indicatorsTicker.containsValue(null)) extrairDouble(precoSobreLucroAlternativo.toString()) else extrairDouble(indicatorsTicker["preco_lucro"].toString())
-        val company = pageProps.getOrDefault("company", emptyMap<String, Objects>()) as Map<*, *>
+        val responseDTO = ResponseDTO.parseMapToDto(StockWebClient(acaoConfig, ticker).getContentFromAPI())
+        val indicatorsTicker = responseDTO?.indicatorsTicker
+        val valuation = responseDTO?.valuation
+        val paper = responseDTO?.paper
+        val indicadoresAlternativos = paper?.indicadores
+        val indicadorAlternativoPL = indicadoresAlternativos?.get(0)?.Value_F
+        val indicadorAlternativoPVP = indicadoresAlternativos?.get(1)?.Value_F
+        val precoSobreValorPatrimonial = if(indicatorsTicker?.pvp == null) extrairDouble(indicadorAlternativoPVP.toString()) else extrairDouble(valuation?.pvp.toString())
+        val precoSobreLucro = if(indicatorsTicker?.preco_lucro == null) extrairDouble(indicadorAlternativoPL.toString()) else extrairDouble(indicatorsTicker.preco_lucro.toString())
+        val company = responseDTO?.company
 
-        val freeFloat = extrairDouble(company["percentual_AcoesFreeFloat"].toString())
-        val margemLiquida = extrairDouble(company["margemLiquida"].toString())
-        val roe = extrairDouble(company["roe"].toString())
-        val cagrLucro = extrairDouble(company["lucros_Cagr5"].toString())
-        val setorAtuacaoClean = company["setor_Atuacao_clean"].toString()
-        val estaEmRecuperacaoJudicial = company["injudicialProcess"].toString().toBoolean()
-        val liquidezCorrente = extrairDouble(company["liquidezCorrente"].toString())
-        val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company["dividaliquida_PatrimonioLiquido"].toString())
-        val dividaLiquidaSobreEbitda = extrairDouble(company["dividaLiquida_Ebit"].toString())
+        val freeFloat = extrairDouble(company?.percentual_AcoesFreeFloat.toString())
+        val margemLiquida = extrairDouble(company?.margemLiquida.toString())
+        val roe = extrairDouble(company?.roe.toString())
+        val cagrLucro = extrairDouble(company?.lucros_Cagr5.toString())
+        val setorAtuacaoClean = company?.setor_Atuacao_clean.toString()
+        val estaEmRecuperacaoJudicial = company?.injudicialProcess.toString().toBoolean()
+        val liquidezCorrente = extrairDouble(company?.liquidezCorrente.toString())
+        val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company?.dividaliquida_PatrimonioLiquido.toString())
+        val dividaLiquidaSobreEbitda = extrairDouble(company?.dividaLiquida_Ebit.toString())
 
         return Mono.justOrEmpty(
             StockAnalysisDto(

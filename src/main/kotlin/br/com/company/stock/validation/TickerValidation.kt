@@ -1,8 +1,6 @@
 package br.com.company.stock.validation
 
 import br.com.company.stock.exception.BusinessException
-import org.springframework.util.ObjectUtils
-import org.springframework.util.StringUtils
 
 class TickerValidation {
     fun validarTicker(ticker: String): Boolean {
