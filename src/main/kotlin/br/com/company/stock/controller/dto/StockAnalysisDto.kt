@@ -10,5 +10,6 @@ data class StockAnalysisDto(
     val possuiBomNivelLiquidezCorrente: Boolean,
     val possuiBomNivelDividaLiquidaSobrePatrimonioLiquido: Boolean,
     val possuiBomNivelDividaLiquidaSobreEbitda: Boolean,
-    val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean
+    val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean,
+    val possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador: Boolean
 )
