@@ -1,11 +1,13 @@
 package br.com.company.stock.service
 
-import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.client.StockWebClient
+import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.config.StockParametersApiConfig
 import br.com.company.stock.controller.dto.StockAnalysisDto
 import br.com.company.stock.validation.TickerValidation
 import io.netty.util.internal.StringUtil
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
@@ -14,6 +16,10 @@ import reactor.core.publisher.Mono
 @CacheConfig(cacheNames = ["analise"])
 @Service
 class StockService(val acaoConfig: StockParametersApiConfig) {
+
+    companion object{
+        var logger: Logger? = LoggerFactory.getLogger(StockService::class.java)
+    }
     @Cacheable(value = ["analise"])
     fun getAnalisys(ticker: String): Mono<StockAnalysisDto> {
 
@@ -54,6 +60,8 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
                 possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial)
             )
         )
+            .doOnSuccess{ logger?.info("Analysis performed successfully.") }
+            .doOnError{ logger?.error("An error occurred while performing analysis: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double) = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1

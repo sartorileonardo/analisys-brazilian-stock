@@ -63,6 +63,10 @@ data class StockAnalysisDto(
 @CacheConfig(cacheNames = ["analise"])
 @Service
 class StockService(val acaoConfig: StockParametersApiConfig) {
+
+    companion object{
+        var logger: Logger? = LoggerFactory.getLogger(StockService::class.java)
+    }
     @Cacheable(value = ["analise"])
     fun getAnalisys(ticker: String): Mono<StockAnalysisDto> {
 
@@ -103,6 +107,8 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
                 possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial)
             )
         )
+            .doOnSuccess{ logger?.info("Analysis performed successfully.") }
+            .doOnError{ logger?.error("An error occurred while performing analysis: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double) = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
