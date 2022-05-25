@@ -107,8 +107,8 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
                 possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial)
             )
         )
-            .doOnSuccess{ logger?.info("Analysis performed successfully.") }
-            .doOnError{ logger?.error("An error occurred while performing analysis: \nCause: ${it.message} \nMessage: ${it.message}") }
+            .doOnSuccess{ logger?.info("Analysis performed successfully. $ticker") }
+            .doOnError{ logger?.error("An error occurred while performing analysis $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double) = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
