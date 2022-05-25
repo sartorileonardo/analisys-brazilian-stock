@@ -36,22 +36,6 @@ class StockWebClient(
             return httpResponse
         }
 
-        fun getResponseReactive(): Mono<ResponseDTO>? {
-            val completeUrl = "${config.url}${ticker.toLowerCase()}/"
-            val webClient = WebClient.create(completeUrl)
-            return webClient
-                .get()
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError){
-                    Mono.error { NotFoundException(MESSAGE_NOT_FOUND) }
-                }
-                .onStatus(HttpStatus::is5xxServerError){
-                    Mono.error { ConnectionFailException(MESSAGE_CONNECTION_FAIL) }
-                }
-                .bodyToMono(ResponseDTO::class.java)
-        }
-
         private fun getHttpResponse(httpRequest: HttpRequest, httpClient: HttpClient, retry: RetryTemplate?): HttpResponse<String>? {
             val httpResponse = retry?.execute(RetryCallback<HttpResponse<String>, java.net.ConnectException> {
                 try{
