@@ -2,7 +2,6 @@ package br.com.company.stock.exception
 
 import br.com.company.stock.controller.dto.ErrorDto
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
