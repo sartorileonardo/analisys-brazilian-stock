@@ -92,6 +92,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
     private fun possuiBomNivelPrecoSobreLucro(precoSobreLucro: Double) = precoSobreLucro.compareTo(0.00) >= 1 && precoSobreLucro in 0.10..acaoConfig.maximoPrecoSobreLucro.toDouble()
 
     private fun possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong: Double) = tagAlong.toInt() == 100
+    
     private fun extrairDouble(texto: String): Double =
         if (StringUtil.isNullOrEmpty(texto) || texto == "-") 0.00 else texto.trim()
             .replace(",", ".")
