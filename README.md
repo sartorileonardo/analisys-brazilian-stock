@@ -67,6 +67,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
     companion object{
         var logger: Logger? = LoggerFactory.getLogger(StockService::class.java)
     }
+
     @Cacheable(value = ["analise"])
     fun getAnalisys(ticker: String): Mono<StockAnalysisDto> {
 
@@ -76,6 +77,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
         val indicatorsTicker = responseDTO?.indicatorsTicker
         val valuation = responseDTO?.valuation
         val paper = responseDTO?.paper
+        val tagAlong = extrairDouble(responseDTO?.paper?.tagAlong.toString())
         val indicadoresAlternativos = paper?.indicadores
         val indicadorAlternativoPL = indicadoresAlternativos?.get(0)?.Value_F
         val indicadorAlternativoPVP = indicadoresAlternativos?.get(1)?.Value_F
@@ -104,10 +106,11 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
                 possuiBomNivelLiquidezCorrente(liquidezCorrente),
                 possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
                 possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
-                possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial)
+                possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
+                possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
             )
         )
-            .doOnSuccess{ logger?.info("Analysis performed successfully. $ticker") }
+            .doOnSuccess{ logger?.info("Analysis performed successfully: $ticker") }
             .doOnError{ logger?.error("An error occurred while performing analysis $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
@@ -135,6 +138,8 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
 
     private fun possuiBomNivelPrecoSobreLucro(precoSobreLucro: Double) = precoSobreLucro.compareTo(0.00) >= 1 && precoSobreLucro in 0.10..acaoConfig.maximoPrecoSobreLucro.toDouble()
 
+    private fun possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong: Double) = tagAlong.toInt() == 100
+    
     private fun extrairDouble(texto: String): Double =
         if (StringUtil.isNullOrEmpty(texto) || texto == "-") 0.00 else texto.trim()
             .replace(",", ".")
