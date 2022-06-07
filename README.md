@@ -27,18 +27,31 @@ config:
   minimoROE: 10.00
   minimoCagrLucro5anos: 15.00
   minimoMargemLiquida: 10.00
-  minimoLiquidez: 2.00
+  minimoLiquidez: 1
   maximoDividaLiquidaSobrePatrimonioLiquido: 2.00
   maximoDividaLiquidaSobreEbitda: 2.50
   maximoPrecoSobreLucro: 15.00
   maximoPrecoSobreValorPatrimonial: 3.00
 
-  url: "${URL_EXTERNAL_API}"
-  timeout: 1
+  databaseName: ${DATABASE_NAME}
+  urlDatabase: ${URL_DATABASE}
+  timeoutDatabase: 60000
+
+  urlExternalAPI: ${URL_EXTERNAL_API}
+  timeoutExternalAPI: 60000
+  timeMinRetry: 2000
+  timeMaxRetry: 5000
+  maxAttempsRetry: 3
+
+  messageTickerNotFound: "Sorry, the ticker not found!"
+  messageConnectionFail: "Sorry, the connection whith external API is fail. Retry again after 1 minute!"
 
 server:
   port: 8888
 
+logging:
+  level:
+    ROOT: INFO
 ```
 
 ## StockAnalisysDto.java
@@ -60,19 +73,34 @@ data class StockAnalysisDto(
 
 ## StockService.java
 ```kotlin
-@CacheConfig(cacheNames = ["analise"])
 @Service
-class StockService(val acaoConfig: StockParametersApiConfig) {
+class StockService(val acaoConfig: StockParametersApiConfig, val repository: StockAnalysisRepository) {
 
     companion object{
-        var logger: Logger? = LoggerFactory.getLogger(StockService::class.java)
+        var LOGGER: Logger? = LoggerFactory.getLogger(StockService::class.java)
     }
 
     @Cacheable(value = ["analise"])
-    fun getAnalisys(ticker: String): Mono<StockAnalysisDto> {
+    fun getAnalisys(ticker: String): Mono<StockAnalysisDTO> {
 
         TickerValidation().validarTicker(ticker.trim())
 
+        if(repository.existsById(ticker).block()!!){
+            return repository.findById(ticker)
+                .map { StockAnalysisEntity.toDTO(it) }
+                .doOnSuccess { LOGGER?.info("Analysis from database performed successfully: $ticker") }
+                .doOnError { LOGGER?.error("Analysis from database did find an error $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+        }
+
+        val entity = StockAnalysisDTO.toEntity(getExternalAnalisys(ticker))
+
+        return repository.save(entity)
+            .map { StockAnalysisEntity.toDTO(it) }
+            .doOnSuccess { LOGGER?.info("Analysis from external API performed and save successfully: $ticker") }
+            .doOnError { LOGGER?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+    }
+
+    fun getExternalAnalisys(ticker: String): StockAnalysisDTO {
         val responseDTO = ResponseDTO.parseMapToDto(StockWebClient(acaoConfig, ticker).getContentFromAPI())
         val indicatorsTicker = responseDTO?.indicatorsTicker
         val valuation = responseDTO?.valuation
@@ -95,23 +123,21 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
         val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company?.dividaliquida_PatrimonioLiquido.toString())
         val dividaLiquidaSobreEbitda = extrairDouble(company?.dividaLiquida_Ebit.toString())
 
-        return Mono.justOrEmpty(
-            StockAnalysisDto(
-                estaEmSetorPerene(setorAtuacaoClean),
-                estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
-                possuiBomNivelFreeFloat(freeFloat),
-                possuiBomNivelRetornoSobrePatrimonio(roe),
-                possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
-                possuiBomNivelMargemLiquida(margemLiquida),
-                possuiBomNivelLiquidezCorrente(liquidezCorrente),
-                possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
-                possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
-                possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
-                possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
-            )
+        return StockAnalysisDTO(
+            ticker,
+            estaEmSetorPerene(setorAtuacaoClean),
+            estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
+            possuiBomNivelFreeFloat(freeFloat),
+            possuiBomNivelRetornoSobrePatrimonio(roe),
+            possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
+            possuiBomNivelMargemLiquida(margemLiquida),
+            possuiBomNivelLiquidezCorrente(liquidezCorrente),
+            possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
+            possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
+            possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
+            possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
         )
-            .doOnSuccess{ logger?.info("Analysis performed successfully: $ticker") }
-            .doOnError{ logger?.error("An error occurred while performing analysis $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double) = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
@@ -130,7 +156,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
 
     private fun estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial: Boolean) = !estaEmRecuperacaoJudicial
 
-    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) = liquidezCorrente.compareTo(1.00) >= 1
+    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) = liquidezCorrente.compareTo(1.00) >= acaoConfig.minimoLiquidez.toInt()
 
     private fun possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro: Double, precoSobreValorPatrimonial: Double) = possuiBomNivelPrecoSobreLucro(precoSobreLucro) && possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial)
 
@@ -139,7 +165,7 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
     private fun possuiBomNivelPrecoSobreLucro(precoSobreLucro: Double) = precoSobreLucro.compareTo(0.00) >= 1 && precoSobreLucro in 0.10..acaoConfig.maximoPrecoSobreLucro.toDouble()
 
     private fun possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong: Double) = tagAlong.toInt() == 100
-    
+
     private fun extrairDouble(texto: String): Double =
         if (StringUtil.isNullOrEmpty(texto) || texto == "-") 0.00 else texto.trim()
             .replace(",", ".")

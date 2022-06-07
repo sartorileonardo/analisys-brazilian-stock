@@ -30,14 +30,6 @@ config:
 server:
    port: 8888
 
-   #data.mongodb.uri: ${URL_MONGO_API}
-   #data.mongodb.database: ${DATABASE_NAME}
-spring:
-   data:
-      mongodb:
-         uri: "mongodb+srv://stock-analisys-br.fffox.mongodb.net/stockanalisys --username mongodb --password stockanalisys-mongodb"
-         database: "stock-analisys-br"
-
 logging:
    level:
       ROOT: INFO
