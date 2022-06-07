@@ -28,7 +28,6 @@ class DatabaseConfig(
 
     @Bean
     fun mongoClient(): MongoClient {
-        val mongoTimeoutSeconds = Duration.ofMillis(config.timeoutDatabase.toLong())
         val connectionString =
             ConnectionString(databaseUri)
         val settings: MongoClientSettings = MongoClientSettings.builder()

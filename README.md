@@ -2,6 +2,9 @@
 
 > Spring boot with Kotlin, Spring Boot, Cache, WebClient, Swagger and Heroku Cloud
 
+## Design Solution
+![Design Solution](img/StockAnalisysDesignSolution.drawio.png)
+
 ## Run Application
 `mvn spring-boot:run`
 

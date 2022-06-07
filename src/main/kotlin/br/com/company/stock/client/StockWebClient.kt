@@ -7,10 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.support.RetryTemplate
 import java.net.ConnectException
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 import java.time.Duration
 import java.util.*
 
@@ -21,7 +17,7 @@ class StockWebClient(
 
         fun getResponse(): HttpResponse<String>? {
             val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
-            val httpClient: HttpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build()
+            val httpClient: HttpClient = newBuilder().version(Version.HTTP_2).build()
             val httpRequest: HttpRequest = getHttpRequest(completeUrl, config.timeoutExternalAPI.toLong())
             val retry = getRetryConfig()
             val httpResponse = getHttpResponse(httpRequest, httpClient, retry)
@@ -50,7 +46,7 @@ class StockWebClient(
 
         private fun getHttpRequest(completeUrl: String, timeout: Long) = HttpRequest.newBuilder()
             .uri(URI(completeUrl))
-            .version(HttpClient.Version.HTTP_2)
+            .version(Version.HTTP_2)
             .GET()
             .timeout(Duration.ofMillis(timeout))
             .build()
