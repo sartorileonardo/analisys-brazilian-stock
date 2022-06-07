@@ -8,7 +8,7 @@ config:
    minimoROE: 10.00
    minimoCagrLucro5anos: 15.00
    minimoMargemLiquida: 10.00
-   minimoLiquidez: 2.00
+   minimoLiquidez: 1
    maximoDividaLiquidaSobrePatrimonioLiquido: 2.00
    maximoDividaLiquidaSobreEbitda: 2.50
    maximoPrecoSobreLucro: 15.00

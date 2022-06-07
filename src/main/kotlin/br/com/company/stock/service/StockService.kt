@@ -37,13 +37,6 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
             .map { StockAnalysisEntity.toDTO(it) }
             .doOnSuccess { logger?.info("Analysis from external API performed and save successfully: $ticker") }
             .doOnError { logger?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
-        /*return repository.findById(ticker)
-            .map { it.toDTO(it) }
-            .switchIfEmpty(getExternalAnalisis(ticker))
-            .do { repository.save(it) }
-            //.doOnEach { repository.save(it.toEntity(it)) }
-            .doOnSuccess { logger?.info("Analysis performed successfully: $ticker") }
-            .doOnError { logger?.error("An error occurred while performing analysis $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }*/
     }
 
     fun getExternalAnalisys(ticker: String): StockAnalysisDTO {
@@ -107,7 +100,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 
     private fun estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial: Boolean) = !estaEmRecuperacaoJudicial
 
-    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) = liquidezCorrente.compareTo(1.00) >= 1
+    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) = liquidezCorrente.compareTo(1.00) >= acaoConfig.minimoLiquidez.toInt()
 
     private fun possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro: Double, precoSobreValorPatrimonial: Double) = possuiBomNivelPrecoSobreLucro(precoSobreLucro) && possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial)
 
