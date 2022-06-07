@@ -14,8 +14,15 @@ config:
    maximoPrecoSobreLucro: 15.00
    maximoPrecoSobreValorPatrimonial: 3.00
 
-   url: "https://www.suno.com.br/acoes/"
-   timeout: 1
+   #databaseName: ${DATABASE_NAME}
+   #urlDatabase: ${URL_DATABASE}
+   databaseName: stock-analisys-br
+   urlDatabase: mongodb+srv://mongodb:stockanalisys-mongodb@stock-analisys-br.fffox.mongodb.net/?retryWrites=true&w=majority
+   timeoutDatabase: 60000
+
+   #urlExternalAPI: ${URL_EXTERNAL_API}
+   urlExternalAPI: https://www.suno.com.br/acoes/
+   timeoutExternalAPI: 60000
    timeMinRetry: 2000
    timeMaxRetry: 5000
    maxAttempsRetry: 3
@@ -25,3 +32,16 @@ config:
 
 server:
    port: 8888
+
+   #data.mongodb.uri: ${URL_MONGO_API}
+   #data.mongodb.database: ${DATABASE_NAME}
+spring:
+   data:
+      mongodb:
+         uri: "mongodb+srv://stock-analisys-br.fffox.mongodb.net/stockanalisys --username mongodb --password stockanalisys-mongodb"
+         database: "stock-analisys-br"
+
+logging:
+   level:
+      ROOT: INFO
+

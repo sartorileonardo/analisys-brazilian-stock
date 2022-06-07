@@ -11,7 +11,7 @@ import org.springframework.scheduling.annotation.Scheduled
 @Configuration
 @EnableCaching
 @EnableScheduling
-class EmbeddedCacheConfig(
+class CacheConfig(
     @Autowired
     val cacheManager: CacheManager
 ) {

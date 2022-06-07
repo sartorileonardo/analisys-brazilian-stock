@@ -3,29 +3,50 @@ package br.com.company.stock.service
 import br.com.company.stock.client.StockWebClient
 import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.config.StockParametersApiConfig
-import br.com.company.stock.controller.dto.StockAnalysisDto
+import br.com.company.stock.controller.dto.StockAnalysisDTO
+import br.com.company.stock.repository.StockAnalysisRepository
+import br.com.company.stock.repository.entity.StockAnalysisEntity
 import br.com.company.stock.validation.TickerValidation
 import io.netty.util.internal.StringUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.cache.annotation.CacheConfig
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
-@CacheConfig(cacheNames = ["analise"])
 @Service
-class StockService(val acaoConfig: StockParametersApiConfig) {
+class StockService(val acaoConfig: StockParametersApiConfig, val repository: StockAnalysisRepository) {
 
     companion object{
         var logger: Logger? = LoggerFactory.getLogger(StockService::class.java)
     }
 
     @Cacheable(value = ["analise"])
-    fun getAnalisys(ticker: String): Mono<StockAnalysisDto> {
+    fun getAnalisys(ticker: String): Mono<StockAnalysisDTO> {
 
         TickerValidation().validarTicker(ticker.trim())
 
+        if(repository.existsById(ticker).block()!!){
+            return repository.findById(ticker)
+                .map { StockAnalysisEntity.toDTO(it) }
+                .doOnSuccess { logger?.info("Analysis from database performed successfully: $ticker") }
+                .doOnError { logger?.error("Analysis from database did find an error $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+        }
+        val entity = StockAnalysisDTO.toEntity(getExternalAnalisys(ticker))
+        return repository.save(entity)
+            .map { StockAnalysisEntity.toDTO(it) }
+            .doOnSuccess { logger?.info("Analysis from external API performed and save successfully: $ticker") }
+            .doOnError { logger?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+        /*return repository.findById(ticker)
+            .map { it.toDTO(it) }
+            .switchIfEmpty(getExternalAnalisis(ticker))
+            .do { repository.save(it) }
+            //.doOnEach { repository.save(it.toEntity(it)) }
+            .doOnSuccess { logger?.info("Analysis performed successfully: $ticker") }
+            .doOnError { logger?.error("An error occurred while performing analysis $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }*/
+    }
+
+    fun getExternalAnalisys(ticker: String): StockAnalysisDTO {
         val responseDTO = ResponseDTO.parseMapToDto(StockWebClient(acaoConfig, ticker).getContentFromAPI())
         val indicatorsTicker = responseDTO?.indicatorsTicker
         val valuation = responseDTO?.valuation
@@ -48,23 +69,26 @@ class StockService(val acaoConfig: StockParametersApiConfig) {
         val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company?.dividaliquida_PatrimonioLiquido.toString())
         val dividaLiquidaSobreEbitda = extrairDouble(company?.dividaLiquida_Ebit.toString())
 
-        return Mono.justOrEmpty(
-            StockAnalysisDto(
-                estaEmSetorPerene(setorAtuacaoClean),
-                estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
-                possuiBomNivelFreeFloat(freeFloat),
-                possuiBomNivelRetornoSobrePatrimonio(roe),
-                possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
-                possuiBomNivelMargemLiquida(margemLiquida),
-                possuiBomNivelLiquidezCorrente(liquidezCorrente),
-                possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
-                possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
-                possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
-                possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
-            )
+        val dto = StockAnalysisDTO(
+            ticker,
+            estaEmSetorPerene(setorAtuacaoClean),
+            estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
+            possuiBomNivelFreeFloat(freeFloat),
+            possuiBomNivelRetornoSobrePatrimonio(roe),
+            possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
+            possuiBomNivelMargemLiquida(margemLiquida),
+            possuiBomNivelLiquidezCorrente(liquidezCorrente),
+            possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
+            possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
+            possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
+            possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
         )
-            .doOnSuccess{ logger?.info("Analysis performed successfully: $ticker") }
-            .doOnError{ logger?.error("An error occurred while performing analysis $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+        /*
+        repository.save(dto.toEntity(dto))
+            .doOnSuccess{ logger?.info("Save with successfully: $ticker") }
+            .doOnError{ logger?.error("An error occurred to saving $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
+        */
+        return dto
     }
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double) = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1

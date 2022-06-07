@@ -1,16 +1,11 @@
 package br.com.company.stock.client
 
-import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.config.StockParametersApiConfig
 import br.com.company.stock.exception.ConnectionFailException
 import br.com.company.stock.exception.NotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.http.HttpStatus
-import org.springframework.http.MediaType
 import org.springframework.retry.RetryCallback
 import org.springframework.retry.support.RetryTemplate
-import org.springframework.web.reactive.function.client.WebClient
-import reactor.core.publisher.Mono
 import java.net.ConnectException
 import java.net.URI
 import java.net.http.HttpClient
@@ -23,14 +18,11 @@ class StockWebClient(
     private val config: StockParametersApiConfig,
     private val ticker: String
 ) {
-    companion object {
-        val MESSAGE_CONNECTION_FAIL = "Sorry, connection fail with external API, retry later."
-        val MESSAGE_NOT_FOUND = "Sorry, ticker not found."
-    }
+
         fun getResponse(): HttpResponse<String>? {
-            val completeUrl = "${config.url}${ticker.toLowerCase()}/"
+            val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
             val httpClient: HttpClient = HttpClient.newBuilder().version(HttpClient.Version.HTTP_2).build()
-            val httpRequest: HttpRequest = getHttpRequest(completeUrl, config.timeout.toLong())
+            val httpRequest: HttpRequest = getHttpRequest(completeUrl, config.timeoutExternalAPI.toLong())
             val retry = getRetryConfig()
             val httpResponse = getHttpResponse(httpRequest, httpClient, retry)
             return httpResponse
@@ -56,11 +48,11 @@ class StockWebClient(
             .uniformRandomBackoff(config.timeMinRetry.toLong(), config.timeMaxRetry.toLong())
             .build()
 
-        private fun getHttpRequest(completeUrl: String, timeoutMinutes: Long) = HttpRequest.newBuilder()
+        private fun getHttpRequest(completeUrl: String, timeout: Long) = HttpRequest.newBuilder()
             .uri(URI(completeUrl))
             .version(HttpClient.Version.HTTP_2)
             .GET()
-            .timeout(Duration.ofMinutes(timeoutMinutes))
+            .timeout(Duration.ofMillis(timeout))
             .build()
 
         fun getContentFromAPI(): Map<String, Objects> {
