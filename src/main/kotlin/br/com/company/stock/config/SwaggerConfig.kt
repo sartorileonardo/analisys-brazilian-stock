@@ -12,7 +12,7 @@ import springfox.documentation.spring.web.plugins.Docket
 
 
 @Configuration
-class SwaggerCustomConfig {
+class SwaggerConfig {
 
     @Bean
     fun api(): Docket {

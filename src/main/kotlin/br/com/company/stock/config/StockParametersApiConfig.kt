@@ -16,8 +16,11 @@ class StockParametersApiConfig{
     lateinit var maximoDividaLiquidaSobreEbitda: String
     lateinit var maximoPrecoSobreLucro: String
     lateinit var maximoPrecoSobreValorPatrimonial: String
-    lateinit var url: String
-    lateinit var timeout: String
+    lateinit var urlExternalAPI: String
+    lateinit var urlDatabase: String
+    lateinit var databaseName: String
+    lateinit var timeoutDatabase: String
+    lateinit var timeoutExternalAPI: String
     lateinit var timeMinRetry: String
     lateinit var timeMaxRetry: String
     lateinit var maxAttempsRetry: String
