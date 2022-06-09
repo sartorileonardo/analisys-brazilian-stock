@@ -19,7 +19,7 @@ config:
   timeoutDatabase: 60000
 
   urlExternalAPI: https://www.suno.com.br/acoes/
-  timeoutExternalAPI: 60000
+  timeoutExternalAPI: 10000
   timeMinRetry: 2000
   timeMaxRetry: 5000
   maxAttempsRetry: 3

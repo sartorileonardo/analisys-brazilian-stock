@@ -1,10 +1,13 @@
 package br.com.company.stock.client
 
 import br.com.company.stock.config.StockParametersApiConfig
+import br.com.company.stock.exception.NotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 import java.util.*
+import java.util.function.Function
 
 class StockWebClient(
     private val config: StockParametersApiConfig,
@@ -14,13 +17,15 @@ class StockWebClient(
     fun getResponse(): String? {
         val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
         val webClient = WebClient.create().mutate().codecs { it -> it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }.build()
-        val responseJson = webClient.get()
+        val responseJson = webClient
+            .get()
             .uri(completeUrl)
-            .exchange()
+            .retrieve()
+            .onStatus(HttpStatus::is4xxClientError, Function { throw NotFoundException(config.messageTickerNotFound) })
+            .onStatus(HttpStatus::is5xxServerError, Function { throw NotFoundException(config.messageConnectionFail) })
+            .bodyToMono(String::class.java)
             .retry(config.timeMaxRetry.toLong())
             .timeout(Duration.ofMillis(config.timeoutExternalAPI.toLong()))
-            .block()!!
-            .bodyToMono(String::class.java)
             .block()
         return responseJson
     }

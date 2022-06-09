@@ -46,7 +46,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         val indicatorsTicker = responseDTO?.indicatorsTicker
         val valuation = responseDTO?.valuation
         val paper = responseDTO?.paper
-        val tagAlong = extrairDouble(responseDTO?.paper?.tagAlong.toString())
+        //val tagAlong = if(responseDTO?.paper?.tagAlong != null) extrairDouble(responseDTO?.paper?.tagAlong.toString()) else 0.00
         val indicadoresAlternativos = paper?.indicadores
         val indicadorAlternativoPL = indicadoresAlternativos?.get(0)?.Value_F
         val indicadorAlternativoPVP = indicadoresAlternativos?.get(1)?.Value_F
@@ -60,7 +60,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
             )
         val company = responseDTO?.company
 
-        val freeFloat = extrairDouble(company?.percentual_AcoesFreeFloat.toString())
+        //val freeFloat = if(company?.percentual_AcoesFreeFloat != null) extrairDouble(company?.percentual_AcoesFreeFloat.toString()) else 0.00
         val margemLiquida = extrairDouble(company?.margemLiquida.toString())
         val roe = extrairDouble(company?.roe.toString())
         val cagrLucro = extrairDouble(company?.lucros_Cagr5.toString())
@@ -68,21 +68,21 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         val estaEmRecuperacaoJudicial = company?.injudicialProcess.toString().toBoolean()
         val liquidezCorrente = extrairDouble(company?.liquidezCorrente.toString())
         val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company?.dividaliquida_PatrimonioLiquido.toString())
-        val dividaLiquidaSobreEbitda = extrairDouble(company?.dividaLiquida_Ebit.toString())
+        //val dividaLiquidaSobreEbitda = extrairDouble(company?.dividaLiquida_Ebit.toString())
 
         return StockAnalysisDTO(
             ticker,
             estaEmSetorPerene(setorAtuacaoClean),
             estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
-            possuiBomNivelFreeFloat(freeFloat),
+            //possuiBomNivelFreeFloat(freeFloat),
             possuiBomNivelRetornoSobrePatrimonio(roe),
             possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
             possuiBomNivelMargemLiquida(margemLiquida),
             possuiBomNivelLiquidezCorrente(liquidezCorrente),
             possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
-            possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
+            //possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
             possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
-            possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
+            //possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
         )
 
     }

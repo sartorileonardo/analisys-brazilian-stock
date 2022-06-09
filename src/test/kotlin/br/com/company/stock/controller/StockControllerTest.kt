@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 @AutoConfigureMockMvc
 class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     private val urlValidApi: String = "/stock/analisys/"
-    private val urlInvalidApi: String = "/stock/analisys/ticker"
+    private val urlInvalidApi: String = "/stock/analisys/ticker/"
     private val exampleValidTicker: String = "ABEV3"
     private val exampleInvalidTicker: String = "ABEVV"
     private val exampleNotFoundTicker: String = "ABEV5"
