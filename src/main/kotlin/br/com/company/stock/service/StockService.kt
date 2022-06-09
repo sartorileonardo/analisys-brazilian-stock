@@ -43,9 +43,9 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 
     fun getExternalAnalisys(ticker: String): StockAnalysisDTO {
         val responseDTO = ResponseDTO.parseMapToDto(StockWebClient(acaoConfig, ticker).getContentFromAPI())
-        val indicatorsTicker = responseDTO?.indicatorsTicker
-        val valuation = responseDTO?.valuation
-        val paper = responseDTO?.paper
+        val indicatorsTicker = responseDTO.indicatorsTicker
+        val valuation = responseDTO.valuation
+        val paper = responseDTO.paper
         //val tagAlong = if(responseDTO?.paper?.tagAlong != null) extrairDouble(responseDTO?.paper?.tagAlong.toString()) else 0.00
         val indicadoresAlternativos = paper?.indicadores
         val indicadorAlternativoPL = indicadoresAlternativos?.get(0)?.Value_F
@@ -58,7 +58,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
             if (indicatorsTicker?.preco_lucro == null) extrairDouble(indicadorAlternativoPL.toString()) else extrairDouble(
                 indicatorsTicker.preco_lucro.toString()
             )
-        val company = responseDTO?.company
+        val company = responseDTO.company
 
         //val freeFloat = if(company?.percentual_AcoesFreeFloat != null) extrairDouble(company?.percentual_AcoesFreeFloat.toString()) else 0.00
         val margemLiquida = extrairDouble(company?.margemLiquida.toString())
