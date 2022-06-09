@@ -14,7 +14,8 @@ class HandlerException {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     fun handleNotFound(
         exception: NotFoundException,
-        request: HttpServletRequest): ErrorDTO {
+        request: HttpServletRequest
+    ): ErrorDTO {
         return ErrorDTO(
             status = HttpStatus.NOT_FOUND.value(),
             error = HttpStatus.NOT_FOUND.name,
@@ -27,7 +28,8 @@ class HandlerException {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleValidation(
         exception: BusinessException,
-        request: HttpServletRequest): ErrorDTO {
+        request: HttpServletRequest
+    ): ErrorDTO {
         return ErrorDTO(
             status = HttpStatus.BAD_REQUEST.value(),
             error = HttpStatus.BAD_REQUEST.name,

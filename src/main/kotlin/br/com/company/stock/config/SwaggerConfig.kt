@@ -25,7 +25,8 @@ class SwaggerConfig {
     }
 
     private fun getApiInfo(): ApiInfo {
-        val contact = Contact("Leonardo Sartori", "https://www.linkedin.com/in/sartorileonardo/", "leonardogt4@hotmail.com")
+        val contact =
+            Contact("Leonardo Sartori", "https://www.linkedin.com/in/sartorileonardo/", "leonardogt4@hotmail.com")
         return ApiInfoBuilder()
             .title("Stock Analisys")
             .description("Analise de empresa brasileira de capital aberto")

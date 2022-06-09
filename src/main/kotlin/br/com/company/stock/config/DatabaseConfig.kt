@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
-import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Configuration
@@ -32,7 +31,7 @@ class DatabaseConfig(
             ConnectionString(databaseUri)
         val settings: MongoClientSettings = MongoClientSettings.builder()
             .applyConnectionString(connectionString)
-            .applyToSocketSettings{
+            .applyToSocketSettings {
                 it.connectTimeout(config.timeoutDatabase.toInt(), TimeUnit.SECONDS)
             }
             .applyToConnectionPoolSettings {
@@ -50,6 +49,5 @@ class DatabaseConfig(
     }
 
     @Bean
-    fun reactiveMongoTemplate()
-            = ReactiveMongoTemplate(mongoClient(), databaseName)
+    fun reactiveMongoTemplate() = ReactiveMongoTemplate(mongoClient(), databaseName)
 }

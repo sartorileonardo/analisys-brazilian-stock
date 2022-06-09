@@ -15,7 +15,7 @@ class StockAnalysisDTO(
     val possuiBomNivelDividaLiquidaSobreResultadoOperacional: Boolean,
     val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean,
     val possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador: Boolean
-){
+) {
     companion object {
         fun toEntity(dto: StockAnalysisDTO): StockAnalysisEntity {
             return StockAnalysisEntity(

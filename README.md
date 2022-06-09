@@ -3,19 +3,24 @@
 > Spring boot with Kotlin, Spring Boot, Cache, WebClient, Swagger and Heroku Cloud
 
 ## Design Solution
+
 ![Design Solution](img/StockAnalisysDesignSolution.drawio.png)
 
 ## Run Application
+
 `mvn spring-boot:run`
 
 ## Swagger localhost documentation
+
 http://localhost:8888/swagger-ui/index.html#
 
 ## Swagger heroku documentation
+
 https://analisys-brazilian-stock.herokuapp.com/swagger-ui/index.html#
 
 ## Postman
-><code>[postman/postman_collection.json](postman/postman_collection.json)</code>
+
+> <code>[postman/postman_collection.json](postman/postman_collection.json)</code>
 
 ## application.yml
 
@@ -58,6 +63,7 @@ logging:
 ```
 
 ## StockAnalisysDto.java
+
 ```kotlin
 data class StockAnalysisDto(
     val estaEmSetorPerene: Boolean,
@@ -73,13 +79,13 @@ data class StockAnalysisDto(
 )
 ```
 
-
 ## StockService.java
+
 ```kotlin
 @Service
 class StockService(val acaoConfig: StockParametersApiConfig, val repository: StockAnalysisRepository) {
 
-    companion object{
+    companion object {
         var LOGGER: Logger? = LoggerFactory.getLogger(StockService::class.java)
     }
 
@@ -88,7 +94,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 
         TickerValidation().validarTicker(ticker.trim())
 
-        if(repository.existsById(ticker).block()!!){
+        if (repository.existsById(ticker).block()!!) {
             return repository.findById(ticker)
                 .map { StockAnalysisEntity.toDTO(it) }
                 .doOnSuccess { LOGGER?.info("Analysis from database performed successfully: $ticker") }
@@ -112,8 +118,14 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         val indicadoresAlternativos = paper?.indicadores
         val indicadorAlternativoPL = indicadoresAlternativos?.get(0)?.Value_F
         val indicadorAlternativoPVP = indicadoresAlternativos?.get(1)?.Value_F
-        val precoSobreValorPatrimonial = if(indicatorsTicker?.pvp == null) extrairDouble(indicadorAlternativoPVP.toString()) else extrairDouble(valuation?.pvp.toString())
-        val precoSobreLucro = if(indicatorsTicker?.preco_lucro == null) extrairDouble(indicadorAlternativoPL.toString()) else extrairDouble(indicatorsTicker.preco_lucro.toString())
+        val precoSobreValorPatrimonial =
+            if (indicatorsTicker?.pvp == null) extrairDouble(indicadorAlternativoPVP.toString()) else extrairDouble(
+                valuation?.pvp.toString()
+            )
+        val precoSobreLucro =
+            if (indicatorsTicker?.preco_lucro == null) extrairDouble(indicadorAlternativoPL.toString()) else extrairDouble(
+                indicatorsTicker.preco_lucro.toString()
+            )
         val company = responseDTO?.company
 
         val freeFloat = extrairDouble(company?.percentual_AcoesFreeFloat.toString())
@@ -143,29 +155,42 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 
     }
 
-    private fun possuiBomNivelFreeFloat(freeFloat: Double) = freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
+    private fun possuiBomNivelFreeFloat(freeFloat: Double) =
+        freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
 
-    private fun possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagr: Double) = cagr.compareTo(acaoConfig.minimoCagrLucro5anos.toDouble()) >= 1
+    private fun possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagr: Double) =
+        cagr.compareTo(acaoConfig.minimoCagrLucro5anos.toDouble()) >= 1
 
     private fun possuiBomNivelRetornoSobrePatrimonio(roe: Double) = roe.compareTo(acaoConfig.minimoROE.toDouble()) >= 1
 
     private fun estaEmSetorPerene(setorDeOperacao: String) = acaoConfig.setoresParenes.contains(setorDeOperacao)
 
-    private fun possuiBomNivelMargemLiquida(margemLiquida: Double) = margemLiquida.compareTo(acaoConfig.minimoMargemLiquida.toDouble()) >= 1
+    private fun possuiBomNivelMargemLiquida(margemLiquida: Double) =
+        margemLiquida.compareTo(acaoConfig.minimoMargemLiquida.toDouble()) >= 1
 
-    private fun possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido: Double) = dividaLiquidaSobrePatrimonioLiquido.compareTo(acaoConfig.maximoDividaLiquidaSobrePatrimonioLiquido.toDouble()) < 1
+    private fun possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido: Double) =
+        dividaLiquidaSobrePatrimonioLiquido.compareTo(acaoConfig.maximoDividaLiquidaSobrePatrimonioLiquido.toDouble()) < 1
 
-    private fun possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda: Double) = dividaLiquidaSobreEbitda.compareTo(0.00) >= 1 && dividaLiquidaSobreEbitda.compareTo(acaoConfig.maximoDividaLiquidaSobreEbitda.toDouble()) <= 1
+    private fun possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda: Double) =
+        dividaLiquidaSobreEbitda.compareTo(0.00) >= 1 && dividaLiquidaSobreEbitda.compareTo(acaoConfig.maximoDividaLiquidaSobreEbitda.toDouble()) <= 1
 
     private fun estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial: Boolean) = !estaEmRecuperacaoJudicial
 
-    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) = liquidezCorrente.compareTo(1.00) >= acaoConfig.minimoLiquidez.toInt()
+    private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) =
+        liquidezCorrente.compareTo(1.00) >= acaoConfig.minimoLiquidez.toInt()
 
-    private fun possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro: Double, precoSobreValorPatrimonial: Double) = possuiBomNivelPrecoSobreLucro(precoSobreLucro) && possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial)
+    private fun possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(
+        precoSobreLucro: Double,
+        precoSobreValorPatrimonial: Double
+    ) = possuiBomNivelPrecoSobreLucro(precoSobreLucro) && possuiBomNivelPrecoSobreValorPatrimonial(
+        precoSobreValorPatrimonial
+    )
 
-    private fun possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial: Double) = precoSobreValorPatrimonial.compareTo(0.00) >= 1 && precoSobreValorPatrimonial in 0.10..acaoConfig.maximoPrecoSobreValorPatrimonial.toDouble()
+    private fun possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial: Double) =
+        precoSobreValorPatrimonial.compareTo(0.00) >= 1 && precoSobreValorPatrimonial in 0.10..acaoConfig.maximoPrecoSobreValorPatrimonial.toDouble()
 
-    private fun possuiBomNivelPrecoSobreLucro(precoSobreLucro: Double) = precoSobreLucro.compareTo(0.00) >= 1 && precoSobreLucro in 0.10..acaoConfig.maximoPrecoSobreLucro.toDouble()
+    private fun possuiBomNivelPrecoSobreLucro(precoSobreLucro: Double) =
+        precoSobreLucro.compareTo(0.00) >= 1 && precoSobreLucro in 0.10..acaoConfig.maximoPrecoSobreLucro.toDouble()
 
     private fun possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong: Double) = tagAlong.toInt() == 100
 
@@ -178,6 +203,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 ```
 
 ## StockController.java
+
 ```kotlin
 @CrossOrigin(origins = ["*"])
 @RestController
@@ -190,6 +216,7 @@ class StockController @Autowired constructor(val service: StockService){
 ```
 
 ## StockControllerTest.java
+
 ```kotlin
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -224,7 +251,9 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
 
 }
 ```
+
 ## TickerValidation.java
+
 ```kotlin
 class TickerValidation {
     fun validarTicker(ticker: String): Boolean {

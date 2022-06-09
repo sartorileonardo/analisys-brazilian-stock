@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/stock")
 @Api(description = "Analise de empresa brasileira de capital aberto")
-class StockController @Autowired constructor(val service: StockService){
+class StockController @Autowired constructor(val service: StockService) {
     @GetMapping("/analisys/{ticker}")
     fun getAnalisys(@PathVariable ticker: String) = service.getAnalisys(ticker)
 }

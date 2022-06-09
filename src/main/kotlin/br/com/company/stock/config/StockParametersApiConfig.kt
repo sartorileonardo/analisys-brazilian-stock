@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "config")
-class StockParametersApiConfig{
+class StockParametersApiConfig {
     lateinit var setoresParenes: List<String>
     lateinit var minimoFreeFloat: String
     lateinit var minimoROE: String

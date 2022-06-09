@@ -1,36 +1,36 @@
 config:
-   setoresParenes: [
-      "utilidade-publica",
-      "materiais-basicos",
-      "financeiro-e-outros",
-      "saude"]
-   minimoFreeFloat: 25.00
-   minimoROE: 10.00
-   minimoCagrLucro5anos: 15.00
-   minimoMargemLiquida: 10.00
-   minimoLiquidez: 1
-   maximoDividaLiquidaSobrePatrimonioLiquido: 2.00
-   maximoDividaLiquidaSobreEbitda: 2.50
-   maximoPrecoSobreLucro: 15.00
-   maximoPrecoSobreValorPatrimonial: 3.00
+  setoresParenes: [
+    "utilidade-publica",
+    "materiais-basicos",
+    "financeiro-e-outros",
+    "saude" ]
+  minimoFreeFloat: 25.00
+  minimoROE: 10.00
+  minimoCagrLucro5anos: 15.00
+  minimoMargemLiquida: 10.00
+  minimoLiquidez: 1
+  maximoDividaLiquidaSobrePatrimonioLiquido: 2.00
+  maximoDividaLiquidaSobreEbitda: 2.50
+  maximoPrecoSobreLucro: 15.00
+  maximoPrecoSobreValorPatrimonial: 3.00
 
-   databaseName: ${DATABASE_NAME}
-   urlDatabase: ${URL_DATABASE}
-   timeoutDatabase: 60000
+  databaseName: stock-analisys-br
+  urlDatabase: mongodb+srv://mongodb:stockanalisys-mongodb@stock-analisys-br.fffox.mongodb.net/?retryWrites=true&w=majority
+  timeoutDatabase: 60000
 
-   urlExternalAPI: ${URL_EXTERNAL_API}
-   timeoutExternalAPI: 60000
-   timeMinRetry: 2000
-   timeMaxRetry: 5000
-   maxAttempsRetry: 3
+  urlExternalAPI: https://www.suno.com.br/acoes/
+  timeoutExternalAPI: 60000
+  timeMinRetry: 2000
+  timeMaxRetry: 5000
+  maxAttempsRetry: 3
 
-   messageTickerNotFound: "Sorry, the ticker not found!"
-   messageConnectionFail: "Sorry, the connection whith external API is fail. Retry again after 1 minute!"
+  messageTickerNotFound: "Sorry, the ticker not found!"
+  messageConnectionFail: "Sorry, the connection whith external API is fail. Retry again after 1 minute!"
 
 server:
-   port: 8888
+  port: 8888
 
 logging:
-   level:
-      ROOT: INFO
+  level:
+    ROOT: INFO
 

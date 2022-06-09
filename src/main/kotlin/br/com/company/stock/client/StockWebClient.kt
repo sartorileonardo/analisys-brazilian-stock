@@ -1,12 +1,8 @@
 package br.com.company.stock.client
 
 import br.com.company.stock.config.StockParametersApiConfig
-import br.com.company.stock.exception.ConnectionFailException
-import br.com.company.stock.exception.NotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.retry.RetryCallback
-import org.springframework.retry.support.RetryTemplate
-import java.net.ConnectException
+import org.springframework.web.reactive.function.client.WebClient
 import java.time.Duration
 import java.util.*
 
@@ -15,46 +11,26 @@ class StockWebClient(
     private val ticker: String
 ) {
 
-        fun getResponse(): HttpResponse<String>? {
-            val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
-            val httpClient: HttpClient = newBuilder().version(Version.HTTP_2).build()
-            val httpRequest: HttpRequest = getHttpRequest(completeUrl, config.timeoutExternalAPI.toLong())
-            val retry = getRetryConfig()
-            val httpResponse = getHttpResponse(httpRequest, httpClient, retry)
-            return httpResponse
-        }
+    fun getResponse(): String? {
+        val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
+        val webClient = WebClient.create().mutate().codecs { it -> it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }.build()
+        val responseJson = webClient.get()
+            .uri(completeUrl)
+            .exchange()
+            .retry(config.timeMaxRetry.toLong())
+            .timeout(Duration.ofMillis(config.timeoutExternalAPI.toLong()))
+            .block()!!
+            .bodyToMono(String::class.java)
+            .block()
+        return responseJson
+    }
 
-        private fun getHttpResponse(httpRequest: HttpRequest, httpClient: HttpClient, retry: RetryTemplate?): HttpResponse<String>? {
-            val httpResponse = retry?.execute(RetryCallback<HttpResponse<String>, java.net.ConnectException> {
-                try{
-                    httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString())
-                }catch (e: ConnectException){
-                    throw ConnectionFailException(config.messageConnectionFail)
-                }
-            })
-            when(httpResponse?.statusCode()){
-                500 -> throw ConnectionFailException(config.messageConnectionFail)
-                404 -> throw NotFoundException(config.messageTickerNotFound)
-            }
-            return httpResponse
-        }
-
-        private fun getRetryConfig() = RetryTemplate.builder()
-            .maxAttempts(config.maxAttempsRetry.toInt())
-            .uniformRandomBackoff(config.timeMinRetry.toLong(), config.timeMaxRetry.toLong())
-            .build()
-
-        private fun getHttpRequest(completeUrl: String, timeout: Long) = HttpRequest.newBuilder()
-            .uri(URI(completeUrl))
-            .version(Version.HTTP_2)
-            .GET()
-            .timeout(Duration.ofMillis(timeout))
-            .build()
-
-        fun getContentFromAPI(): Map<String, Objects> {
-            val props = ObjectMapper().readValue(getResponse()
-                    ?.body()!!.substringAfter("<script id=\"__NEXT_DATA__\" type=\"application/json\">", "</script>"), Map::class.java).get("props") as Map<String, Objects>
-            return props["pageProps"] as Map<String, Objects>
-        }
+    fun getContentFromAPI(): Map<String, Objects> {
+        val props = ObjectMapper().readValue(
+            getResponse()!!.substringAfter("<script id=\"__NEXT_DATA__\" type=\"application/json\">", "</script>"),
+            Map::class.java
+        ).get("props") as Map<String, Objects>
+        return props["pageProps"] as Map<String, Objects>
+    }
 
 }

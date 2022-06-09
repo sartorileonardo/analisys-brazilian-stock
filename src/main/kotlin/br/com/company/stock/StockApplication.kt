@@ -10,6 +10,7 @@ import org.springframework.retry.annotation.EnableRetry
 @EnableRetry
 @SpringBootApplication
 class ForumApplication
+
 fun main(args: Array<String>) {
-	runApplication<ForumApplication>(*args)
+    runApplication<ForumApplication>(*args)
 }

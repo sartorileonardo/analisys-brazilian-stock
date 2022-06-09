@@ -21,22 +21,28 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
 
     @Test
     fun findAnalisysWhenReturnIs200Code() {
-        mockMvc.perform(get("${urlValidApi}${exampleValidTicker}")
-            .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(
+            get("${urlValidApi}${exampleValidTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isOk)
     }
 
     @Test
-    fun findAnalisysWhenReturnIs400Code(){
-        mockMvc.perform(get("${urlValidApi}${exampleInvalidTicker}")
-            .contentType(MediaType.APPLICATION_JSON))
+    fun findAnalisysWhenReturnIs400Code() {
+        mockMvc.perform(
+            get("${urlValidApi}${exampleInvalidTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isBadRequest)
     }
 
     @Test
-    fun findAnalisysWhenReturnIs404Code(){
-        mockMvc.perform(get("${urlInvalidApi}${exampleValidTicker}")
-            .contentType(MediaType.APPLICATION_JSON))
+    fun findAnalisysWhenReturnIs404Code() {
+        mockMvc.perform(
+            get("${urlInvalidApi}${exampleValidTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isNotFound)
     }
 

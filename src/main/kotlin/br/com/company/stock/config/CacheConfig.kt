@@ -16,7 +16,7 @@ class CacheConfig(
     val cacheManager: CacheManager
 ) {
     @Scheduled(fixedRate = 300000000)
-    fun clearCache(){
+    fun clearCache() {
         cacheManager.getCache("analise")?.clear()
     }
 }
