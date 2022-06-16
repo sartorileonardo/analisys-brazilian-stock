@@ -11,5 +11,5 @@ import org.springframework.web.bind.annotation.*
 @Api(description = "Analise de empresa brasileira de capital aberto")
 class StockController @Autowired constructor(val service: StockService) {
     @GetMapping("/analisys/{ticker}")
-    fun getAnalisys(@PathVariable ticker: String) = service.getAnalisys(ticker)
+    fun getAnalisys(@PathVariable ticker: String) = service.getAnalisys(ticker.toUpperCase())
 }

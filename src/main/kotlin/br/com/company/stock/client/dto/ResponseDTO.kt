@@ -6,11 +6,13 @@ import java.util.*
 data class ResponseDTO(
     val valuation: ValuationDTO? = null,
     val indicatorsTicker: IndicatorsTickerDTO? = null,
+    val otherIndicators: OtherIndicatorsDTO? = null,
     val paper: PaperDTO? = null,
     val pvp: String? = null,
     val precoSobreValorPatrimonial: String? = null,
     val precoSobreLucro: String? = null,
     val company: CompanyDTO? = null,
+    val isNegotiationActive: Boolean
 ) {
     companion object {
         fun parseMapToDto(map: Map<String, Objects>): ResponseDTO {

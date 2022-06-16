@@ -9,5 +9,7 @@ data class CompanyDTO(
     val injudicialProcess: String? = null,
     val liquidezCorrente: String? = null,
     val dividaliquida_PatrimonioLiquido: String? = null,
-    val dividaLiquida_Ebit: String? = null
+    val dividaLiquida_Ebit: String? = null,
+    val segmento_Atuacao: String? = null,
+    val bookName: String? = null
 )
