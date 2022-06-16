@@ -10,12 +10,16 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.data.mongodb.config.AbstractReactiveMongoConfiguration
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate
 import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories
+import org.springframework.scheduling.annotation.EnableScheduling
+import org.springframework.scheduling.annotation.Scheduled
 import java.util.concurrent.TimeUnit
 
 @Configuration
+@EnableScheduling
 @EnableReactiveMongoRepositories(basePackageClasses = arrayOf(StockAnalysisRepository::class))
 class DatabaseConfig(
-    private val config: StockParametersApiConfig
+    private val config: StockParametersApiConfig,
+    private val repository: StockAnalysisRepository
 ) : AbstractReactiveMongoConfiguration() {
 
     private val databaseName = config.databaseName
@@ -50,4 +54,7 @@ class DatabaseConfig(
 
     @Bean
     fun reactiveMongoTemplate() = ReactiveMongoTemplate(mongoClient(), databaseName)
+
+    @Scheduled(cron = "0 0 1 * *")
+    fun autoClean() = repository.deleteAll()
 }
