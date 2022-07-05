@@ -50,4 +50,5 @@ class DatabaseConfig(
 
     @Bean
     fun reactiveMongoTemplate() = ReactiveMongoTemplate(mongoClient(), databaseName)
+
 }
