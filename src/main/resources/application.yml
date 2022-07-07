@@ -61,11 +61,11 @@ config:
     "USIM3"
   ]
 
-  databaseName: stock-analisys-br
-  urlDatabase: mongodb+srv://mongodb:stockanalisys-mongodb@stock-analisys-br.fffox.mongodb.net/?retryWrites=true&w=majority
+  databaseName: ${DATABASE_NAME}
+  urlDatabase: ${URL_DATABASE}
   timeoutDatabase: 60000
 
-  urlExternalAPI: https://www.suno.com.br/acoes/
+  urlExternalAPI: ${URL_EXTERNAL_API}
 
   timeoutExternalAPI: 10000
   timeMinRetry: 2000
