@@ -32,27 +32,75 @@ https://analisys-brazilian-stock.herokuapp.com/swagger-ui/index.html#
 
 ```yaml
 config:
+
   setoresParenes: [
     "utilidade-publica",
     "materiais-basicos",
     "financeiro-e-outros",
-    "saude"]
+    "saude" ]
+
   minimoFreeFloat: 25.00
   minimoROE: 10.00
   minimoCagrLucro5anos: 15.00
   minimoMargemLiquida: 10.00
+  minimoMargemEbit: 20.00
   minimoLiquidez: 1
   maximoDividaLiquidaSobrePatrimonioLiquido: 2.00
-  maximoDividaLiquidaSobreEbitda: 2.50
+  maximoDividaLiquidaSobreEbit: 2.50
   maximoPrecoSobreLucro: 15.00
   maximoPrecoSobreValorPatrimonial: 3.00
+
+  tickersMostTraded: [
+    "VALE3",
+    "ITUB3",
+    "PETR3",
+    "BBDC3",
+    "B3SA3",
+    "ABEV3",
+    "MGLU3",
+    "VIIA3",
+    "ITSA3",
+    "BBAS3",
+    "HAPV3",
+    "COGN3",
+    "ELET3",
+    "CIEL3",
+    "RENT3",
+    "CPLE3",
+    "WEGE3",
+    "EGIE3",
+    "BPAC3",
+    "BRFS3",
+    "CCRO3",
+    "CMIG3",
+    "CSNA3",
+    "CVCB3",
+    "CYRE3",
+    "EQTL3",
+    "GGBR3",
+    "GNDI3",
+    "GOAU3",
+    "JBSS3",
+    "KLBN3",
+    "LAME3",
+    "MRFG3",
+    "RADL3",
+    "RAIL3",
+    "SBSP3",
+    "SULA3",
+    "SUZB3",
+    "TOTS3",
+    "UGPA3",
+    "USIM3"
+  ]
 
   databaseName: ${DATABASE_NAME}
   urlDatabase: ${URL_DATABASE}
   timeoutDatabase: 60000
 
   urlExternalAPI: ${URL_EXTERNAL_API}
-  timeoutExternalAPI: 60000
+
+  timeoutExternalAPI: 10000
   timeMinRetry: 2000
   timeMaxRetry: 5000
   maxAttempsRetry: 3
@@ -66,23 +114,51 @@ server:
 logging:
   level:
     ROOT: INFO
+
+
 ```
 
 ## StockAnalisysDto.java
 
 ```kotlin
-data class StockAnalysisDto(
+data class StockAnalysisDTO(
+    val ticker: String,
     val estaEmSetorPerene: Boolean,
     val estaForaDeRecuperacaoJudicial: Boolean,
-    val possuiBomNivelFreeFloat: Boolean,
     val possuiBomNivelRetornoSobrePatrimonio: Boolean,
     val possuiBomNivelCrescimentoLucroNosUltimos5Anos: Boolean,
     val possuiBomNivelMargemLiquida: Boolean,
-    val possuiBomNivelLiquidezCorrente: Boolean,
+    val possuiBomNivelMargemEbit: Boolean,
+    val possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo: Boolean,
     val possuiBomNivelDividaLiquidaSobrePatrimonioLiquido: Boolean,
-    val possuiBomNivelDividaLiquidaSobreEbitda: Boolean,
-    val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean
-)
+    val possuiBomPrecoEmRelacaoAoValorPatrimonial: Boolean,
+    val possuiBomNivelPassivosSobreAtivos: Boolean,
+    val nomeEmpresa: String? = null,
+    val segmentoEmpresa: String? = null,
+    val avaliacaoGeral: AvaliacaoGeral? = null
+) {
+    companion object {
+        fun toEntity(dto: StockAnalysisDTO): StockAnalysisEntity {
+            return StockAnalysisEntity(
+                ticker = dto.ticker,
+                estaEmSetorPerene = dto.estaEmSetorPerene,
+                estaForaDeRecuperacaoJudicial = dto.estaForaDeRecuperacaoJudicial,
+                possuiBomNivelRetornoSobrePatrimonio = dto.possuiBomNivelRetornoSobrePatrimonio,
+                possuiBomNivelCrescimentoLucroNosUltimos5Anos = dto.possuiBomNivelCrescimentoLucroNosUltimos5Anos,
+                possuiBomNivelMargemLiquida = dto.possuiBomNivelMargemLiquida,
+                possuiBomNivelMargemEbit = dto.possuiBomNivelMargemEbit,
+                possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo = dto.possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo,
+                possuiBomNivelDividaLiquidaSobrePatrimonioLiquido = dto.possuiBomNivelDividaLiquidaSobrePatrimonioLiquido,
+                possuiBomPrecoEmRelacaoAoValorPatrimonial = dto.possuiBomPrecoEmRelacaoAoValorPatrimonial,
+                possuiNegociacaoAtiva = dto.possuiBomNivelPassivosSobreAtivos,
+                nomeEmpresa = dto.nomeEmpresa,
+                segmentoEmpresa = dto.segmentoEmpresa,
+                avaliacaoGeral = dto.avaliacaoGeral
+            )
+        }
+    }
+
+}
 ```
 
 ## StockService.java
@@ -102,7 +178,10 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 
         if (repository.existsById(ticker).block()!!) {
             return repository.findById(ticker)
-                .map { StockAnalysisEntity.toDTO(it) }
+                .map {
+                    it.avaliacaoGeral = getAvaliacaoGeral(it.toString())
+                    StockAnalysisEntity.toDTO(it)
+                }
                 .doOnSuccess { LOGGER?.info("Analysis from database performed successfully: $ticker") }
                 .doOnError { LOGGER?.error("Analysis from database did find an error $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
         }
@@ -110,31 +189,53 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         val entity = StockAnalysisDTO.toEntity(getExternalAnalisys(ticker))
 
         return repository.save(entity)
-            .map { StockAnalysisEntity.toDTO(it) }
+            .map {
+                it.avaliacaoGeral = getAvaliacaoGeral(it.toString())
+                StockAnalysisEntity.toDTO(it)
+            }
             .doOnSuccess { LOGGER?.info("Analysis from external API performed and save successfully: $ticker") }
             .doOnError { LOGGER?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
+    @Scheduled(fixedRate = 604800000)
+    fun getAnalisysToTickersMostTraded() {
+        acaoConfig.tickersMostTraded.forEach { ticker -> this.getAnalisys(ticker) }
+        LOGGER!!.info("Loaded tickers most traded...\n")
+    }
+
+    @Scheduled(cron = "0 0 12 1 * ?")
+    fun cleanRepository() {
+        repository.deleteAll()
+        LOGGER!!.info("Repository is cleaned...\n")
+    }
+
+    private fun getAvaliacaoGeral(analisyToString: String): AvaliacaoGeral {
+        val positivesPoints = StringUtils.countOccurrencesOf(analisyToString, "true")
+        val otimoRange = 8..10
+        val bomRange = 6..7
+        val regularRange = 3..5
+        val ruimRange = 0..2
+
+        when (positivesPoints) {
+            in ruimRange -> return AvaliacaoGeral.RUIM
+            in regularRange -> return AvaliacaoGeral.REGULAR
+            in bomRange -> return AvaliacaoGeral.BOM
+            in otimoRange -> return AvaliacaoGeral.OTIMO
+            else -> return AvaliacaoGeral.INDEFINIDO
+        }
+    }
+
     fun getExternalAnalisys(ticker: String): StockAnalysisDTO {
         val responseDTO = ResponseDTO.parseMapToDto(StockWebClient(acaoConfig, ticker).getContentFromAPI())
-        val indicatorsTicker = responseDTO?.indicatorsTicker
-        val valuation = responseDTO?.valuation
-        val paper = responseDTO?.paper
-        val tagAlong = extrairDouble(responseDTO?.paper?.tagAlong.toString())
+        val indicatorsTicker = responseDTO.indicatorsTicker
+        val valuation = responseDTO.valuation
+        val paper = responseDTO.paper
         val indicadoresAlternativos = paper?.indicadores
         val indicadorAlternativoPL = indicadoresAlternativos?.get(0)?.Value_F
-        val indicadorAlternativoPVP = indicadoresAlternativos?.get(1)?.Value_F
-        val precoSobreValorPatrimonial =
-            if (indicatorsTicker?.pvp == null) extrairDouble(indicadorAlternativoPVP.toString()) else extrairDouble(
-                valuation?.pvp.toString()
-            )
-        val precoSobreLucro =
-            if (indicatorsTicker?.preco_lucro == null) extrairDouble(indicadorAlternativoPL.toString()) else extrairDouble(
-                indicatorsTicker.preco_lucro.toString()
-            )
-        val company = responseDTO?.company
+        val indicadorAlternativoPVP = if(indicadoresAlternativos?.get(1)?.Value_F == null) extrairDouble(valuation?.pvp.toString()) else extrairDouble(indicadoresAlternativos.get(1).Value_F!!)
+        val precoSobreValorPatrimonial = extrairDouble(listOfNotNull(indicatorsTicker?.pvp, indicadorAlternativoPVP, valuation?.pvp).distinct().first().toString())
+        val company = responseDTO.company
 
-        val freeFloat = extrairDouble(company?.percentual_AcoesFreeFloat.toString())
         val margemLiquida = extrairDouble(company?.margemLiquida.toString())
         val roe = extrairDouble(company?.roe.toString())
         val cagrLucro = extrairDouble(company?.lucros_Cagr5.toString())
@@ -142,24 +243,29 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         val estaEmRecuperacaoJudicial = company?.injudicialProcess.toString().toBoolean()
         val liquidezCorrente = extrairDouble(company?.liquidezCorrente.toString())
         val dividaLiquidaSobrePatrimonioLiquido = extrairDouble(company?.dividaliquida_PatrimonioLiquido.toString())
-        val dividaLiquidaSobreEbitda = extrairDouble(company?.dividaLiquida_Ebit.toString())
+        val passivosAtivos = extrairDouble(responseDTO.otherIndicators?.passivosAtivos.toString())
+        val margemEbit = extrairDouble(responseDTO.otherIndicators?.margemEbit.toString())
 
         return StockAnalysisDTO(
             ticker,
             estaEmSetorPerene(setorAtuacaoClean),
             estaForaDeRecuperacaoJudicial(estaEmRecuperacaoJudicial),
-            possuiBomNivelFreeFloat(freeFloat),
             possuiBomNivelRetornoSobrePatrimonio(roe),
             possuiBomNivelCrescimentoLucroNosUltimos5Anos(cagrLucro),
             possuiBomNivelMargemLiquida(margemLiquida),
+            possuiBomNivelMargemEbit(margemEbit),
             possuiBomNivelLiquidezCorrente(liquidezCorrente),
             possuiBomNivelDividaLiquidaSobrePatrimonioLiquido(dividaLiquidaSobrePatrimonioLiquido),
-            possuiBomNivelDividaLiquidaSobreEbitda(dividaLiquidaSobreEbitda),
-            possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(precoSobreLucro, precoSobreValorPatrimonial),
-            possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong)
+            possuiBomPrecoEmRelacaoAoValorPatrimonial(precoSobreValorPatrimonial),
+            possuiBomNivelPassivosSobreAtivos(passivosAtivos),
+            company?.bookName,
+            company?.segmento_Atuacao
         )
 
     }
+
+    private fun possuiBomNivelMargemEbit(margemEbit: Double) = margemEbit.compareTo(acaoConfig.minimoMargemLiquida.toDouble()) >= 1
+    private fun possuiBomNivelPassivosSobreAtivos(passivosAtivos: Double) = passivosAtivos.compareTo(1) <= 1
 
     private fun possuiBomNivelFreeFloat(freeFloat: Double) =
         freeFloat.compareTo(acaoConfig.minimoFreeFloat.toDouble()) >= 1
@@ -185,12 +291,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
     private fun possuiBomNivelLiquidezCorrente(liquidezCorrente: Double) =
         liquidezCorrente.compareTo(1.00) >= acaoConfig.minimoLiquidez.toInt()
 
-    private fun possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial(
-        precoSobreLucro: Double,
-        precoSobreValorPatrimonial: Double
-    ) = possuiBomNivelPrecoSobreLucro(precoSobreLucro) && possuiBomNivelPrecoSobreValorPatrimonial(
-        precoSobreValorPatrimonial
-    )
+    private fun possuiBomPrecoEmRelacaoAoValorPatrimonial(precoSobreValorPatrimonial: Double) = possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial)
 
     private fun possuiBomNivelPrecoSobreValorPatrimonial(precoSobreValorPatrimonial: Double) =
         precoSobreValorPatrimonial.compareTo(0.00) >= 1 && precoSobreValorPatrimonial in 0.10..acaoConfig.maximoPrecoSobreValorPatrimonial.toDouble()
@@ -201,10 +302,11 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
     private fun possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador(tagAlong: Double) = tagAlong.toInt() == 100
 
     private fun extrairDouble(texto: String): Double =
-        if (StringUtil.isNullOrEmpty(texto) || texto == "-") 0.00 else texto.trim()
+        if (StringUtil.isNullOrEmpty(texto) || texto == "-") 0.00 else requireNotNull(texto).trim()
             .replace(",", ".")
             .replace("%", "")
             .toDouble()
+
 }
 ```
 
