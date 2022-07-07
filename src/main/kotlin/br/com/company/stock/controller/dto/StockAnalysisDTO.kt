@@ -12,11 +12,11 @@ data class StockAnalysisDTO(
     val possuiBomNivelMargemEbit: Boolean,
     val possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo: Boolean,
     val possuiBomNivelDividaLiquidaSobrePatrimonioLiquido: Boolean,
-    val possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial: Boolean,
+    val possuiBomPrecoEmRelacaoAoValorPatrimonial: Boolean,
     val possuiBomNivelPassivosSobreAtivos: Boolean,
     val nomeEmpresa: String? = null,
     val segmentoEmpresa: String? = null,
-    val avaliacaoGeralDTO: AvaliacaoGeralDTO? = null
+    val avaliacaoGeral: AvaliacaoGeralDTO? = null
 ) {
     companion object {
         fun toEntity(dto: StockAnalysisDTO): StockAnalysisEntity {
@@ -24,25 +24,22 @@ data class StockAnalysisDTO(
                 ticker = dto.ticker,
                 estaEmSetorPerene = dto.estaEmSetorPerene,
                 estaForaDeRecuperacaoJudicial = dto.estaForaDeRecuperacaoJudicial,
-                //possuiBomNivelDeAcoesDisponiveisNoMercado = dto.possuiBomNivelDeAcoesDisponiveisNoMercado,
                 possuiBomNivelRetornoSobrePatrimonio = dto.possuiBomNivelRetornoSobrePatrimonio,
                 possuiBomNivelCrescimentoLucroNosUltimos5Anos = dto.possuiBomNivelCrescimentoLucroNosUltimos5Anos,
                 possuiBomNivelMargemLiquida = dto.possuiBomNivelMargemLiquida,
                 possuiBomNivelMargemEbit = dto.possuiBomNivelMargemEbit,
                 possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo = dto.possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo,
                 possuiBomNivelDividaLiquidaSobrePatrimonioLiquido = dto.possuiBomNivelDividaLiquidaSobrePatrimonioLiquido,
-                //possuiBomNivelDividaLiquidaSobreResultadoOperacional = dto.possuiBomNivelDividaLiquidaSobreResultadoOperacional,
-                possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial = dto.possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial,
-                //possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador = dto.possuiDireitoDeVendaDeAcoesIgualAoAcionistaControlador,
+                possuiBomPrecoEmRelacaoAoValorPatrimonial = dto.possuiBomPrecoEmRelacaoAoValorPatrimonial,
                 possuiNegociacaoAtiva = dto.possuiBomNivelPassivosSobreAtivos,
                 nomeEmpresa = dto.nomeEmpresa,
                 segmentoEmpresa = dto.segmentoEmpresa,
-                avaliacaoGeralDTO = dto.avaliacaoGeralDTO
+                avaliacaoGeral = dto.avaliacaoGeral
             )
         }
     }
 
     override fun toString(): String{
-        return "StockAnalysisDTO(\"ticker\":\"${ticker}\",\"estaEmSetorPerene\":${estaEmSetorPerene},\"estaForaDeRecuperacaoJudicial\":${estaForaDeRecuperacaoJudicial},\"possuiBomNivelRetornoSobrePatrimonio\":${possuiBomNivelRetornoSobrePatrimonio},\"possuiBomNivelCrescimentoLucroNosUltimos5Anos\":${possuiBomNivelCrescimentoLucroNosUltimos5Anos},\"possuiBomNivelMargemLiquida\":${possuiBomNivelMargemLiquida},\"possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo\":${possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo},\"possuiBomNivelDividaLiquidaSobrePatrimonioLiquido\":${possuiBomNivelDividaLiquidaSobrePatrimonioLiquido},\"possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial\":${possuiBomPrecoEmRelacaoAoLucroAssimComoValorPatrimonial},\"nomeEmpresa\":\"${nomeEmpresa}\",\"segmentoEmpresa\":\"${segmentoEmpresa}\",\"avaliacaoGeralDTO\":\"${avaliacaoGeralDTO.toString()}\")"
+        return "StockAnalysisDTO(\"ticker\":\"${ticker}\",\"estaEmSetorPerene\":${estaEmSetorPerene},\"estaForaDeRecuperacaoJudicial\":${estaForaDeRecuperacaoJudicial},\"possuiBomNivelRetornoSobrePatrimonio\":${possuiBomNivelRetornoSobrePatrimonio},\"possuiBomNivelCrescimentoLucroNosUltimos5Anos\":${possuiBomNivelCrescimentoLucroNosUltimos5Anos},\"possuiBomNivelMargemLiquida\":${possuiBomNivelMargemLiquida},\"possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo\":${possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo},\"possuiBomNivelDividaLiquidaSobrePatrimonioLiquido\":${possuiBomNivelDividaLiquidaSobrePatrimonioLiquido},\"possuiBomPrecoEmRelacaoAoValorPatrimonial\":${possuiBomPrecoEmRelacaoAoValorPatrimonial},\"nomeEmpresa\":\"${nomeEmpresa}\",\"segmentoEmpresa\":\"${segmentoEmpresa}\",\"avaliacaoGeralDTO\":\"${avaliacaoGeral.toString()}\")"
     }
 }
