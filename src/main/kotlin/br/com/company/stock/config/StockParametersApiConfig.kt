@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConfigurationProperties(prefix = "config")
 class StockParametersApiConfig {
     lateinit var setoresParenes: List<String>
+    lateinit var tickersMostTraded: List<String>
     lateinit var minimoFreeFloat: String
     lateinit var minimoROE: String
     lateinit var minimoCagrLucro5anos: String

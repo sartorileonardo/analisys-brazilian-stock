@@ -1,9 +1,11 @@
 config:
+
   setoresParenes: [
     "utilidade-publica",
     "materiais-basicos",
     "financeiro-e-outros",
     "saude" ]
+
   minimoFreeFloat: 25.00
   minimoROE: 10.00
   minimoCagrLucro5anos: 15.00
@@ -14,6 +16,50 @@ config:
   maximoDividaLiquidaSobreEbit: 2.50
   maximoPrecoSobreLucro: 15.00
   maximoPrecoSobreValorPatrimonial: 3.00
+
+  tickersMostTraded: [
+    "VALE3",
+    "ITUB3",
+    "PETR3",
+    "BBDC3",
+    "B3SA3",
+    "ABEV3",
+    "MGLU3",
+    "VIIA3",
+    "ITSA3",
+    "BBAS3",
+    "HAPV3",
+    "COGN3",
+    "ELET3",
+    "CIEL3",
+    "RENT3",
+    "CPLE3",
+    "WEGE3",
+    "EGIE3",
+    "BPAC3",
+    "BRFS3",
+    "CCRO3",
+    "CMIG3",
+    "CSNA3",
+    "CVCB3",
+    "CYRE3",
+    "EQTL3",
+    "GGBR3",
+    "GNDI3",
+    "GOAU3",
+    "JBSS3",
+    "KLBN3",
+    "LAME3",
+    "MRFG3",
+    "RADL3",
+    "RAIL3",
+    "SBSP3",
+    "SULA3",
+    "SUZB3",
+    "TOTS3",
+    "UGPA3",
+    "USIM3"
+  ]
 
   databaseName: stock-analisys-br
   urlDatabase: mongodb+srv://mongodb:stockanalisys-mongodb@stock-analisys-br.fffox.mongodb.net/?retryWrites=true&w=majority

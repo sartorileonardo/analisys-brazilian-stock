@@ -1,6 +1,6 @@
 package br.com.company.stock.repository.entity
 
-import br.com.company.stock.controller.dto.AvaliacaoGeralDTO
+import br.com.company.stock.controller.dto.AvaliacaoGeral
 import br.com.company.stock.controller.dto.StockAnalysisDTO
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
@@ -21,7 +21,7 @@ data class StockAnalysisEntity(
     val possuiNegociacaoAtiva: Boolean,
     val nomeEmpresa: String? = null,
     val segmentoEmpresa :String? = null,
-    var avaliacaoGeral: AvaliacaoGeralDTO? = null
+    var avaliacaoGeral: AvaliacaoGeral? = null
 ) {
 
     companion object {

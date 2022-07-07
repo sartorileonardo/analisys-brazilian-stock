@@ -3,7 +3,7 @@ package br.com.company.stock.service
 import br.com.company.stock.client.StockWebClient
 import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.config.StockParametersApiConfig
-import br.com.company.stock.controller.dto.AvaliacaoGeralDTO
+import br.com.company.stock.controller.dto.AvaliacaoGeral
 import br.com.company.stock.controller.dto.StockAnalysisDTO
 import br.com.company.stock.repository.StockAnalysisRepository
 import br.com.company.stock.repository.entity.StockAnalysisEntity
@@ -12,6 +12,7 @@ import io.netty.util.internal.StringUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
@@ -31,7 +32,7 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         if (repository.existsById(ticker).block()!!) {
             return repository.findById(ticker)
                 .map {
-                    it.avaliacaoGeral = getAvaliacaoGeralDTO(it.toString())
+                    it.avaliacaoGeral = getAvaliacaoGeral(it.toString())
                     StockAnalysisEntity.toDTO(it)
                 }
                 .doOnSuccess { LOGGER?.info("Analysis from database performed successfully: $ticker") }
@@ -42,14 +43,26 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
 
         return repository.save(entity)
             .map {
-                it.avaliacaoGeral = getAvaliacaoGeralDTO(it.toString())
+                it.avaliacaoGeral = getAvaliacaoGeral(it.toString())
                 StockAnalysisEntity.toDTO(it)
             }
             .doOnSuccess { LOGGER?.info("Analysis from external API performed and save successfully: $ticker") }
             .doOnError { LOGGER?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
-    private fun getAvaliacaoGeralDTO(analisyToString: String): AvaliacaoGeralDTO {
+    @Scheduled(fixedRate = 604800000)
+    fun getAnalisysToTickersMostTraded() {
+        acaoConfig.tickersMostTraded.forEach { ticker -> this.getAnalisys(ticker) }
+        LOGGER!!.info("Loaded tickers most traded...\n")
+    }
+
+    @Scheduled(cron = "0 0 12 1 * ?")
+    fun cleanRepository() {
+        repository.deleteAll()
+        LOGGER!!.info("Repository is cleaned...\n")
+    }
+
+    private fun getAvaliacaoGeral(analisyToString: String): AvaliacaoGeral {
         val positivesPoints = StringUtils.countOccurrencesOf(analisyToString, "true")
         val otimoRange = 8..10
         val bomRange = 6..7
@@ -57,11 +70,11 @@ class StockService(val acaoConfig: StockParametersApiConfig, val repository: Sto
         val ruimRange = 0..2
 
         when (positivesPoints) {
-            in ruimRange -> return AvaliacaoGeralDTO.RUIM
-            in regularRange -> return AvaliacaoGeralDTO.REGULAR
-            in bomRange -> return AvaliacaoGeralDTO.BOM
-            in otimoRange -> return AvaliacaoGeralDTO.OTIMO
-            else -> return AvaliacaoGeralDTO.INDEFINIDO
+            in ruimRange -> return AvaliacaoGeral.RUIM
+            in regularRange -> return AvaliacaoGeral.REGULAR
+            in bomRange -> return AvaliacaoGeral.BOM
+            in otimoRange -> return AvaliacaoGeral.OTIMO
+            else -> return AvaliacaoGeral.INDEFINIDO
         }
     }
 
