@@ -19,7 +19,7 @@ class SwaggerConfig {
         return Docket(DocumentationType.SWAGGER_2)
             .apiInfo(getApiInfo())
             .select()
-            .apis(RequestHandlerSelectors.basePackage("br.com.company.stock.controller"))
+            .apis(RequestHandlerSelectors.basePackage("br.com.company.stock.core.controller"))
             .paths(PathSelectors.any())
             .build()
     }
