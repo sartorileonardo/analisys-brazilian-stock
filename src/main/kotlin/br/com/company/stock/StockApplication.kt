@@ -7,8 +7,8 @@ import org.springframework.boot.runApplication
 
 @ConfigurationPropertiesScan
 @SpringBootApplication
-class ForumApplication
+class StockApplication
 
 fun main(args: Array<String>) {
-    runApplication<ForumApplication>(*args)
+    runApplication<StockApplication>(*args)
 }
