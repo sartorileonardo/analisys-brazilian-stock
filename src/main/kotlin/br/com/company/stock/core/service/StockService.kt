@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono
 
 @Service
 class StockService(val port: StockPort) {
-    @Cacheable(value = ["analise"])
+    @Cacheable(value = ["analisys"])
     fun getAnalisys(ticker: String): Mono<StockDTO> {
         return port.getAnalisys(ticker)
     }

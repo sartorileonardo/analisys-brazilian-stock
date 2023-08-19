@@ -6,12 +6,10 @@ class TickerValidation {
     fun validarTicker(ticker: String): Boolean {
         return validarSeForVazio(ticker)
             .and(validarSePossuiSomenteNumeros(ticker))
-            .and(validarSePossuiSomenteNumeros(ticker))
             .and(validarSePossuiSomenteLetras(ticker))
             .and(validarSeTerminaComDigitoAceito(ticker))
             .and(validarSeForBDR(ticker))
     }
-
     private fun validarSeForBDR(ticker: String) = if (listOf(
             "32",
             "33",

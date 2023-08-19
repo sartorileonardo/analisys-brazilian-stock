@@ -1,14 +1,14 @@
 package br.com.company.stock.infrastructure.adapter
 
-import br.com.company.stock.infrastructure.adapter.client.StockWebClient
-import br.com.company.stock.infrastructure.adapter.client.dto.ResponseDTO
-import br.com.company.stock.infrastructure.config.StockParametersApiConfig
 import br.com.company.stock.core.controller.dto.AvaliacaoGeral
 import br.com.company.stock.core.controller.dto.StockDTO
 import br.com.company.stock.core.mapper.StockMapper
 import br.com.company.stock.core.port.StockPort
-import br.com.company.stock.infrastructure.adapter.repository.StockRepository
 import br.com.company.stock.core.validation.TickerValidation
+import br.com.company.stock.infrastructure.adapter.client.StockWebClient
+import br.com.company.stock.infrastructure.adapter.client.dto.ResponseDTO
+import br.com.company.stock.infrastructure.adapter.repository.StockRepository
+import br.com.company.stock.infrastructure.config.StockParametersApiConfig
 import io.netty.util.internal.StringUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -50,14 +50,6 @@ class StockAdapter(
             .doOnSuccess { LOGGER?.info("Analysis from external API performed and save successfully: $ticker") }
             .doOnError { LOGGER?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
-
-    /*
-    @Scheduled(fixedRate = 604800000)
-    fun getAnalisysToTickersMostTraded() {
-        acaoConfig.tickersMostTraded.forEach { ticker -> this.getAnalisys(ticker) }
-        LOGGER!!.info("Loaded tickers most traded...\n")
-    }
-     */
 
     @Scheduled(cron = "0 0 12 1 * ?")
     fun cleanRepository() {

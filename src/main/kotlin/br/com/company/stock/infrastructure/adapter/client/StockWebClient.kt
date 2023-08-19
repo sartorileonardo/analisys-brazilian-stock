@@ -1,7 +1,7 @@
 package br.com.company.stock.infrastructure.adapter.client
 
-import br.com.company.stock.infrastructure.config.StockParametersApiConfig
 import br.com.company.stock.core.exception.NotFoundException
+import br.com.company.stock.infrastructure.config.StockParametersApiConfig
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
 import org.springframework.web.reactive.function.client.WebClient
@@ -14,7 +14,7 @@ class StockWebClient(
     private val ticker: String
 ) {
 
-    fun getResponse(): String? {
+    private fun getResponse(): String? {
         val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
         val webClient = WebClient.create().mutate().codecs { it -> it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }.build()
         val responseJson = webClient
