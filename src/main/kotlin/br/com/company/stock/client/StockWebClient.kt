@@ -1,6 +1,6 @@
 package br.com.company.stock.client
 
-import br.com.company.stock.config.StockParametersApiConfig
+import br.com.company.stock.config.StockParametersConfig
 import br.com.company.stock.exception.NotFoundException
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.http.HttpStatus
@@ -10,7 +10,7 @@ import java.util.*
 import java.util.function.Function
 
 class StockWebClient(
-    private val config: StockParametersApiConfig
+    private val config: StockParametersConfig
 ) {
 
     private fun getResponse(ticker: String): String? {

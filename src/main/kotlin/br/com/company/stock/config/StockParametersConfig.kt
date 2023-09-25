@@ -5,9 +5,8 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "config")
-class StockParametersApiConfig {
+class StockParametersConfig {
     lateinit var setoresParenes: List<String>
-    lateinit var tickersMostTraded: List<String>
     lateinit var minimoFreeFloat: String
     lateinit var minimoROE: String
     lateinit var minimoCagrLucro5anos: String
@@ -22,9 +21,7 @@ class StockParametersApiConfig {
     lateinit var databaseName: String
     lateinit var timeoutDatabase: String
     lateinit var timeoutExternalAPI: String
-    lateinit var timeMinRetry: String
     lateinit var timeMaxRetry: String
-    lateinit var maxAttempsRetry: String
     lateinit var messageTickerNotFound: String
     lateinit var messageConnectionFail: String
 }

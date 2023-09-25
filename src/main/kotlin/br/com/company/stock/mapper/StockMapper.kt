@@ -1,12 +1,12 @@
 package br.com.company.stock.mapper
 
-import br.com.company.stock.controller.dto.StockDTO
+import br.com.company.stock.dto.StockAnalisysDTO
 import br.com.company.stock.entity.StockEntity
 import org.springframework.stereotype.Component
 
 @Component
 class StockMapper {
-    fun toEntity(dto: StockDTO): StockEntity {
+    fun toEntity(dto: StockAnalisysDTO): StockEntity {
         return StockEntity(
             ticker = dto.ticker,
             estaEmSetorPerene = dto.estaEmSetorPerene,
@@ -21,12 +21,12 @@ class StockMapper {
             possuiNegociacaoAtiva = dto.possuiBomNivelPassivosSobreAtivos,
             nomeEmpresa = dto.nomeEmpresa,
             segmentoEmpresa = dto.segmentoEmpresa,
-            avaliacaoGeral = dto.avaliacaoGeral
+            score = dto.score
         )
     }
 
-    fun toDTO(entity: StockEntity): StockDTO {
-        return StockDTO(
+    fun toDTO(entity: StockEntity): StockAnalisysDTO {
+        return StockAnalisysDTO(
             ticker = entity.ticker,
             estaEmSetorPerene = entity.estaEmSetorPerene,
             estaForaDeRecuperacaoJudicial = entity.estaForaDeRecuperacaoJudicial,
@@ -40,7 +40,7 @@ class StockMapper {
             possuiBomNivelPassivosSobreAtivos = entity.possuiNegociacaoAtiva,
             nomeEmpresa = entity.nomeEmpresa,
             segmentoEmpresa = entity.segmentoEmpresa,
-            avaliacaoGeral = entity.avaliacaoGeral
+            score = entity.score
         )
     }
 

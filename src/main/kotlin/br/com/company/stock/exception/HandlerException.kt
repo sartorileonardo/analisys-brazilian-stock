@@ -1,6 +1,6 @@
 package br.com.company.stock.exception
 
-import br.com.company.stock.controller.dto.ErrorDTO
+import br.com.company.stock.exception.dto.ErrorDTO
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus

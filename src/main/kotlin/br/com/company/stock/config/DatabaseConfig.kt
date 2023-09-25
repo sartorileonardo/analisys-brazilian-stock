@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit
 @Configuration
 @EnableReactiveMongoRepositories(basePackageClasses = arrayOf(StockRepository::class))
 class DatabaseConfig(
-    private val config: StockParametersApiConfig
+    private val config: StockParametersConfig
 ) : AbstractReactiveMongoConfiguration() {
 
     private val databaseName = config.databaseName

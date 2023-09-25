@@ -16,11 +16,10 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     private val urlInvalidApi: String = "/stock/analisys/ticker/"
     private val exampleValidTicker: String = "ABEV3"
     private val exampleInvalidTicker: String = "ABEVV"
-    private val exampleNotFoundTicker: String = "ABEV5"
-
+    private val exampleNotExistTicker: String = "ABEV6"
 
     @Test
-    fun findAnalisysWhenReturnIs200Code() {
+    fun findAnalisysWhenUrlValidApiAndExampleValidTickerReturnIs200Code() {
         mockMvc.perform(
             get("${urlValidApi}${exampleValidTicker}")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -29,7 +28,7 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun findAnalisysWhenReturnIs400Code() {
+    fun findAnalisysWhenInvalidTickerReturnIs400Code() {
         mockMvc.perform(
             get("${urlValidApi}${exampleInvalidTicker}")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -38,7 +37,16 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     }
 
     @Test
-    fun findAnalisysWhenReturnIs404Code() {
+    fun findAnalisysWhenNotExistTickerReturnIs400Code() {
+        mockMvc.perform(
+            get("${urlValidApi}${exampleNotExistTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun findAnalisysWhenUrlInvalidApiReturnIs404Code() {
         mockMvc.perform(
             get("${urlInvalidApi}${exampleValidTicker}")
                 .contentType(MediaType.APPLICATION_JSON)

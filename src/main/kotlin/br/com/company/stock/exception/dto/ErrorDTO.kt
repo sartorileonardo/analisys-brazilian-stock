@@ -1,4 +1,4 @@
-package br.com.company.stock.controller.dto
+package br.com.company.stock.exception.dto
 
 data class ErrorDTO(
     val status: Int,
