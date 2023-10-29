@@ -1,14 +1,20 @@
 package br.com.company.stock.utils
 
-import io.netty.util.internal.StringUtil
+import java.util.*
 
 class ValueUtils {
     companion object {
-        fun getDoubleValue(value: String): Double =
-            if (StringUtil.isNullOrEmpty(value) || value == "-") 0.00 else requireNotNull(value).trim()
+        fun getDoubleValue(anyValue: Any): Double {
+            val value = Objects.requireNonNullElse(anyValue, "0.00") as String
+            if (value == "-") {
+                return value.toDouble();
+            }
+            return value.trim()
                 .replace(",", ".")
                 .replace("%", "")
                 .toDouble()
+        }
+
     }
 
 }

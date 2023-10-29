@@ -4,9 +4,11 @@ import br.com.company.stock.client.dto.ResponseDTO
 import br.com.company.stock.config.StockParametersConfig
 import br.com.company.stock.dto.Score
 import br.com.company.stock.dto.StockAnalisysDTO
+import br.com.company.stock.entity.FundamentalStockEntity
 import br.com.company.stock.mapper.StockMapper
+import br.com.company.stock.repository.FundamentalStockRepository
 import br.com.company.stock.repository.StockRepository
-import br.com.company.stock.utils.ValueUtils
+import br.com.company.stock.utils.ValueUtils.Companion.getDoubleValue
 import br.com.company.stock.validation.TickerValidation
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -19,7 +21,8 @@ import reactor.core.publisher.Mono
 class StockService(
     val configuration: StockParametersConfig,
     val mapper: StockMapper,
-    val repository: StockRepository
+    val stockRepository: StockRepository,
+    val fundamentalStockRepository: FundamentalStockRepository
 ) {
     companion object {
         var LOGGER: Logger? = LoggerFactory.getLogger(StockService::class.java)
@@ -29,7 +32,7 @@ class StockService(
     fun getAnalisys(ticker: String): Mono<StockAnalisysDTO> {
         TickerValidation.validateTicker(ticker)
 
-        if (repository.existsById(ticker).block()!!) {
+        if (stockRepository.existsById(ticker).block()!!) {
             return getAnalisysWhenAlreadyExist(ticker)
         }
 
@@ -39,22 +42,18 @@ class StockService(
     private fun getAnalisysWhenDoesNotYetExist(ticker: String): Mono<StockAnalisysDTO> {
         val entity = mapper.toEntity(getExternalAnalisys(ticker))
 
-        return repository.save(entity)
-            .map {
-                it.score = getScoreEvaluation(it.toString())
-                mapper.toDTO(it)
-            }
-            .doOnSuccess { LOGGER?.info("Analysis from external API performed and save successfully: $ticker") }
+        return stockRepository.save(entity).map {
+            it.score = getScoreEvaluation(it.toString())
+            mapper.toDTO(it)
+        }.doOnSuccess { LOGGER?.info("Analysis from external API performed and save successfully: $ticker") }
             .doOnError { LOGGER?.error("Analysis from external API did find an error and don't save $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
     private fun getAnalisysWhenAlreadyExist(ticker: String): Mono<StockAnalisysDTO> {
-        return repository.findById(ticker)
-            .map {
-                it.score = getScoreEvaluation(it.toString())
-                mapper.toDTO(it)
-            }
-            .doOnSuccess { LOGGER?.info("Analysis from database performed successfully: $ticker") }
+        return stockRepository.findById(ticker).map {
+            it.score = getScoreEvaluation(it.toString())
+            mapper.toDTO(it)
+        }.doOnSuccess { LOGGER?.info("Analysis from database performed successfully: $ticker") }
             .doOnError { LOGGER?.error("Analysis from database did find an error $ticker: \nCause: ${it.message} \nMessage: ${it.message}") }
     }
 
@@ -75,49 +74,149 @@ class StockService(
     }
 
     fun getExternalAnalisys(ticker: String): StockAnalisysDTO {
-        val responseDTO =
-            ResponseDTO.parseMapToDto(
-                br.com.company.stock.client.StockWebClient(configuration).getContentFromAPI(ticker)
+        if (fundamentalStockEntityExist(ticker)) {
+            val fundamentalStockEntity = fundamentalStockRepository.findById(ticker).block()!!
+            return return StockAnalisysDTO(
+                fundamentalStockEntity.ticker,
+                companyIsInPerennialSector(fundamentalStockEntity.sectorOfActivity!!),
+                companyIsNotInJudicialRecovery(fundamentalStockEntity.companyIsInJudicialRecovery!!),
+                companyHasGoodLevelOfReturnOnEquity(fundamentalStockEntity.returnOnEquity!!),
+                companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(fundamentalStockEntity.cagrFiveYears!!),
+                companyHasGoodNetMarginLevel(fundamentalStockEntity.netMargin!!),
+                companyHasGoodNetMarginLajir(fundamentalStockEntity.marginLajir!!),
+                companyHasGoodLevelCurrentLiquidity(fundamentalStockEntity.currentLiquidity!!),
+                companyHasGoodLevelNetDebitOverNetEquity(fundamentalStockEntity.netDebitOverNetEquity!!),
+                companyHasGoodLevelPriceOnBookValue(fundamentalStockEntity.priceOnBookValue!!),
+                companyHasGoodLevelLiabilitiesOverAssets(fundamentalStockEntity.liabilitiesOverAssets!!),
+                fundamentalStockEntity.company,
+                fundamentalStockEntity.operationSegment
             )
+        }
+        val responseDTO = ResponseDTO.parseMapToDto(
+            br.com.company.stock.client.StockWebClient(configuration).getContentFromAPI(ticker)
+        )
         val indicatorsTicker = responseDTO.indicatorsTicker
+        val otherIndicators = responseDTO.otherIndicators
         val valuation = responseDTO.valuation
         val paper = responseDTO.paper
         val alternativesIndicators = paper?.indicadores
         val alternativeIndicatorPVP =
-            if (alternativesIndicators?.get(1)?.Value_F == null) ValueUtils.getDoubleValue(valuation?.pvp.toString()) else ValueUtils.getDoubleValue(
+            if (alternativesIndicators?.get(1)?.Value_F == null) getDoubleValue(valuation?.pvp.toString()) else getDoubleValue(
                 alternativesIndicators.get(1).Value_F!!
             )
-        val priceOnBookValue = ValueUtils.getDoubleValue(
+        val priceOnBookValue = getDoubleValue(
             listOfNotNull(indicatorsTicker?.pvp, alternativeIndicatorPVP, valuation?.pvp).distinct().first().toString()
         )
         val company = responseDTO.company
-        val netMargin = ValueUtils.getDoubleValue(company?.margemLiquida.toString())
-        val returnOnEquity = ValueUtils.getDoubleValue(company?.roe.toString())
-        val cagrFiveYears = ValueUtils.getDoubleValue(company?.lucros_Cagr5.toString())
+        val netMargin = getDoubleValue(company?.margemLiquida.toString())
+        val returnOnEquity = getDoubleValue(company?.roe.toString())
+        val cagrFiveYears = getDoubleValue(company?.lucros_Cagr5.toString())
         val sectorOfActivity = company?.setor_Atuacao_clean.toString()
         val companyIsInJudicialRecovery = company?.injudicialProcess.toString().toBoolean()
-        val currentLiquidity = ValueUtils.getDoubleValue(company?.liquidezCorrente.toString())
-        val netDebitOverNetEquity = ValueUtils.getDoubleValue(company?.dividaliquida_PatrimonioLiquido.toString())
-        val liabilitiesOverAssets = ValueUtils.getDoubleValue(responseDTO.otherIndicators?.passivosAtivos.toString())
-        val marginLajir = ValueUtils.getDoubleValue(responseDTO.otherIndicators?.margemEbit.toString())
+        val currentLiquidity = getDoubleValue(company?.liquidezCorrente.toString())
+        val netDebitOverNetEquity = getDoubleValue(company?.dividaliquida_PatrimonioLiquido.toString())
+        val liabilitiesOverAssets = getDoubleValue(responseDTO.otherIndicators?.passivosAtivos.toString())
+        val marginLajir = getDoubleValue(responseDTO.otherIndicators?.margemEbit.toString())
+
+        val priceProfit = getDoubleValue(indicatorsTicker!!.preco_lucro!!)
+        val priceLajir = getDoubleValue(responseDTO.otherIndicators!!.pEbit!!)
+        val priceSalesRatio = getDoubleValue(valuation!!.psr!!)
+        val priceOnAssets = getDoubleValue(valuation.pAtivos!!)
+        val returnOnAssets = getDoubleValue(valuation.roa!!)
+        val returnOnInvestedCapital = getDoubleValue(company?.roic!!)
+        val evLajir = getDoubleValue(valuation.evEbitda!!)
+
+        val fundamentalStockEntity = saveFundamentalStock(
+            ticker,
+            company?.bookName.toString(),
+            netMargin,
+            returnOnEquity,
+            returnOnAssets,
+            returnOnInvestedCapital,
+            cagrFiveYears,
+            sectorOfActivity,
+            companyIsInJudicialRecovery,
+            currentLiquidity,
+            netDebitOverNetEquity,
+            liabilitiesOverAssets,
+            marginLajir,
+            priceOnBookValue,
+            priceProfit,
+            priceLajir,
+            priceSalesRatio,
+            priceOnAssets,
+            evLajir
+        ).block()!!
 
         return StockAnalisysDTO(
-            ticker,
-            companyIsInPerennialSector(sectorOfActivity),
-            companyIsNotInJudicialRecovery(companyIsInJudicialRecovery),
-            companyHasGoodLevelOfReturnOnEquity(returnOnEquity),
-            companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(cagrFiveYears),
-            companyHasGoodNetMarginLevel(netMargin),
-            companyHasGoodNetMarginLajir(marginLajir),
-            companyHasGoodLevelCurrentLiquidity(currentLiquidity),
-            companyHasGoodLevelNetDebitOverNetEquity(netDebitOverNetEquity),
-            companyHasGoodLevelPriceOnBookValue(priceOnBookValue),
-            companyHasGoodLevelLiabilitiesOverAssets(liabilitiesOverAssets),
-            company?.bookName,
-            company?.segmento_Atuacao
+            fundamentalStockEntity.ticker,
+            companyIsInPerennialSector(fundamentalStockEntity.sectorOfActivity!!),
+            companyIsNotInJudicialRecovery(fundamentalStockEntity.companyIsInJudicialRecovery!!),
+            companyHasGoodLevelOfReturnOnEquity(fundamentalStockEntity.returnOnEquity!!),
+            companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(fundamentalStockEntity.cagrFiveYears!!),
+            companyHasGoodNetMarginLevel(fundamentalStockEntity.netMargin!!),
+            companyHasGoodNetMarginLajir(fundamentalStockEntity.marginLajir!!),
+            companyHasGoodLevelCurrentLiquidity(fundamentalStockEntity.currentLiquidity!!),
+            companyHasGoodLevelNetDebitOverNetEquity(fundamentalStockEntity.netDebitOverNetEquity!!),
+            companyHasGoodLevelPriceOnBookValue(fundamentalStockEntity.priceOnBookValue!!),
+            companyHasGoodLevelLiabilitiesOverAssets(fundamentalStockEntity.liabilitiesOverAssets!!),
+            fundamentalStockEntity.company,
+            fundamentalStockEntity.operationSegment
         )
 
     }
+
+    @Cacheable(value = ["fundamentals"])
+    private fun saveFundamentalStock(
+        ticker: String,
+        company: String,
+        netMargin: Double?,
+        returnOnEquity: Double?,
+        returnOnAssets: Double?,
+        returnOnInvestedCapital: Double?,
+        cagrFiveYears: Double?,
+        sectorOfActivity: String? = null,
+        companyIsInJudicialRecovery: Boolean?,
+        currentLiquidity: Double?,
+        netDebitOverNetEquity: Double?,
+        liabilitiesOverAssets: Double?,
+        marginLajir: Double?,
+        priceOnBookValue: Double?,
+        priceProfit: Double?,
+        priceLajir: Double?,
+        priceSalesRatio: Double?,
+        priceOnAssets: Double?,
+        evLajir: Double?
+    ): Mono<FundamentalStockEntity> {
+        if (fundamentalStockEntityExist(ticker)) {
+            return fundamentalStockRepository.findById(ticker)
+        }
+        val fundamentalStockEntity = FundamentalStockEntity(
+            ticker = ticker,
+            company = company,
+            netMargin = netMargin,
+            returnOnEquity = returnOnEquity,
+            returnOnAssets = returnOnAssets,
+            returnOnInvestedCapital = returnOnInvestedCapital,
+            cagrFiveYears = cagrFiveYears,
+            sectorOfActivity = sectorOfActivity,
+            companyIsInJudicialRecovery = companyIsInJudicialRecovery,
+            currentLiquidity = currentLiquidity,
+            netDebitOverNetEquity = netDebitOverNetEquity,
+            liabilitiesOverAssets = liabilitiesOverAssets,
+            marginLajir = marginLajir,
+            priceOnBookValue = priceOnBookValue,
+            priceProfit = priceProfit,
+            priceLajir = priceLajir,
+            priceSalesRatio = priceSalesRatio,
+            priceOnAssets = priceOnAssets,
+            evLajir = evLajir
+        )
+        return fundamentalStockRepository.save(fundamentalStockEntity)
+    }
+
+    private fun fundamentalStockEntityExist(ticker: String) =
+        fundamentalStockRepository.existsById(ticker).block()!!
 
     private fun companyHasGoodNetMarginLajir(netMarginLajir: Double) =
         netMarginLajir.compareTo(configuration.minimoMargemLiquida.toDouble()) >= 1
