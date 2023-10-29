@@ -5,9 +5,10 @@ import java.util.*
 class ValueUtils {
     companion object {
         fun getDoubleValue(anyValue: Any): Double {
-            val value = Objects.requireNonNullElse(anyValue, "0.00") as String
+            val minValue = "0.00"
+            val value = Objects.requireNonNullElse(anyValue, minValue) as String
             if (value == "-") {
-                return value.toDouble();
+                return minValue.toDouble();
             }
             return value.trim()
                 .replace(",", ".")
