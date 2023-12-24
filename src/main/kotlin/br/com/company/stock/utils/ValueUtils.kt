@@ -7,13 +7,13 @@ class ValueUtils {
         fun getDoubleValue(anyValue: Any): Double {
             val minValue = "0.00"
             val value = Objects.requireNonNullElse(anyValue, minValue) as String
-            val regexValidDouble = """^[+\-]?\d+[.,]?\d*$""".toRegex()
 
-            if (value.isEmpty() || !value.matches(regexValidDouble)) {
-                throw IllegalArgumentException("Invalid double value: $value")
-            }
-
-            return value.trim().replace(",", ".").replace("%", "").toDouble()
+            return value
+                .trim()
+                .replace(",", ".")
+                .replace("%", "")
+                .replace("null", minValue)
+                .toDouble()
         }
 
     }
