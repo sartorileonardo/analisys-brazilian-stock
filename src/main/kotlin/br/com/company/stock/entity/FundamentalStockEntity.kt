@@ -3,6 +3,7 @@ package br.com.company.stock.entity
 import lombok.Getter
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
+import java.time.LocalDate
 
 @Getter
 @Document(collection = "fundamentals")
@@ -16,6 +17,7 @@ data class FundamentalStockEntity(
     val returnOnInvestedCapital: Double?,
     val cagrFiveYears: Double?,
     val sectorOfActivity: String? = null,
+    val segmentOfActivity: String? = null,
     val companyIsInJudicialRecovery: Boolean?,
     val currentLiquidity: Double?,
     val netDebitOverNetEquity: Double?,
@@ -27,5 +29,6 @@ data class FundamentalStockEntity(
     val priceSalesRatio: Double?,
     val priceOnAssets: Double?,
     val evLajir: Double?,
-    val operationSegment: String? = null
+    val operationSegment: String? = null,
+    val createDate: LocalDate? = null
 )

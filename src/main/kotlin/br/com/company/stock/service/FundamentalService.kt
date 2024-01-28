@@ -2,6 +2,8 @@ package br.com.company.stock.service
 
 import br.com.company.stock.entity.FundamentalStockEntity
 import br.com.company.stock.repository.FundamentalStockRepository
+import br.com.company.stock.utils.DateUtils.Companion.getTodayDate
+import br.com.company.stock.utils.DateUtils.Companion.isFundamentalExpired
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.Cacheable
@@ -26,6 +28,7 @@ class FundamentalService(
         returnOnInvestedCapital: Double?,
         cagrFiveYears: Double?,
         sectorOfActivity: String? = null,
+        segmentOfActivity: String? = null,
         companyIsInJudicialRecovery: Boolean?,
         currentLiquidity: Double?,
         netDebitOverNetEquity: Double?,
@@ -39,8 +42,11 @@ class FundamentalService(
         evLajir: Double?
     ): Mono<FundamentalStockEntity> {
         if (fundamentalStockEntityExist(ticker)) {
-            return fundamentalStockRepository.findById(ticker)
+            if (!isFundamentalExpired(getTodayDate(), findById(ticker).block()!!.createDate!!)) {
+                return findById(ticker)
+            }
         }
+        val today = getTodayDate()
         val fundamentalStockEntity = FundamentalStockEntity(
             ticker = ticker,
             company = company,
@@ -50,6 +56,7 @@ class FundamentalService(
             returnOnInvestedCapital = returnOnInvestedCapital,
             cagrFiveYears = cagrFiveYears,
             sectorOfActivity = sectorOfActivity,
+            segmentOfActivity = segmentOfActivity,
             companyIsInJudicialRecovery = companyIsInJudicialRecovery,
             currentLiquidity = currentLiquidity,
             netDebitOverNetEquity = netDebitOverNetEquity,
@@ -60,7 +67,8 @@ class FundamentalService(
             priceLajir = priceLajir,
             priceSalesRatio = priceSalesRatio,
             priceOnAssets = priceOnAssets,
-            evLajir = evLajir
+            evLajir = evLajir,
+            createDate = today
         )
         return fundamentalStockRepository.save(fundamentalStockEntity)
     }

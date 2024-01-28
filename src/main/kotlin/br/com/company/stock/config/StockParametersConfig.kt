@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConstructorBinding
 
 @ConstructorBinding
 @ConfigurationProperties(prefix = "config")
-open class StockParametersConfig {
+class StockParametersConfig {
     lateinit var setoresParenes: List<String>
     lateinit var minimoFreeFloat: String
     lateinit var minimoROE: String
@@ -16,7 +16,8 @@ open class StockParametersConfig {
     lateinit var maximoDividaLiquidaSobreEbitda: String
     lateinit var maximoPrecoSobreLucro: String
     lateinit var maximoPrecoSobreValorPatrimonial: String
-    lateinit var urlExternalAPI: String
+    lateinit var urlFirstExternalAPI: String
+    lateinit var urlSecondExternalAPI: String
     lateinit var urlDatabase: String
     lateinit var databaseName: String
     lateinit var timeoutDatabase: String

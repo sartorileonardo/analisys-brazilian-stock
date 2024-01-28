@@ -6,6 +6,8 @@ import br.com.company.stock.dto.Score
 import br.com.company.stock.dto.StockAnalisysDTO
 import br.com.company.stock.mapper.StockMapper
 import br.com.company.stock.repository.StockRepository
+import br.com.company.stock.utils.DateUtils.Companion.getTodayDate
+import br.com.company.stock.utils.DateUtils.Companion.isFundamentalExpired
 import br.com.company.stock.utils.ValueUtils.Companion.getDoubleValue
 import br.com.company.stock.validation.TickerValidation
 import org.slf4j.Logger
@@ -62,37 +64,43 @@ class StockService(
         val fairRange = 3..5
         val badRange = 0..2
 
-        when (positivePoints) {
-            in badRange -> return Score.BAD
-            in fairRange -> return Score.FAIR
-            in goodRange -> return Score.GOOD
-            in excellentRange -> return Score.EXCELLENT
-            else -> return Score.UNDEFINITE
+        return when (positivePoints) {
+            in badRange -> Score.BAD
+            in fairRange -> Score.FAIR
+            in goodRange -> Score.GOOD
+            in excellentRange -> Score.EXCELLENT
+            else -> Score.UNDEFINITE
         }
     }
 
     fun getExternalAnalisys(ticker: String): StockAnalisysDTO {
         if (fundamentalService.fundamentalStockEntityExist(ticker)) {
-            val fundamentalStockEntity = fundamentalService.findById(ticker).block()!!
-            return StockAnalisysDTO(
-                fundamentalStockEntity.ticker,
-                companyIsInPerennialSector(fundamentalStockEntity.sectorOfActivity!!),
-                companyIsNotInJudicialRecovery(fundamentalStockEntity.companyIsInJudicialRecovery!!),
-                companyHasGoodLevelOfReturnOnEquity(fundamentalStockEntity.returnOnEquity!!),
-                companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(fundamentalStockEntity.cagrFiveYears!!),
-                companyHasGoodNetMarginLevel(fundamentalStockEntity.netMargin!!),
-                companyHasGoodNetMarginLajir(fundamentalStockEntity.marginLajir!!),
-                companyHasGoodLevelCurrentLiquidity(fundamentalStockEntity.currentLiquidity!!),
-                companyHasGoodLevelNetDebitOverNetEquity(fundamentalStockEntity.netDebitOverNetEquity!!),
-                companyHasGoodLevelPriceOnBookValue(fundamentalStockEntity.priceOnBookValue!!),
-                companyHasGoodLevelLiabilitiesOverAssets(fundamentalStockEntity.liabilitiesOverAssets!!),
-                fundamentalStockEntity.company,
-                fundamentalStockEntity.operationSegment
-            )
+            if (!isFundamentalExpired(getTodayDate(), fundamentalService.findById(ticker).block()!!.createDate!!)) {
+                val fundamentalStockEntity = fundamentalService.findById(ticker).block()!!
+                return StockAnalisysDTO(
+                    fundamentalStockEntity.ticker,
+                    companyIsInPerennialSector(fundamentalStockEntity.sectorOfActivity!!),
+                    companyIsNotInJudicialRecovery(fundamentalStockEntity.companyIsInJudicialRecovery!!),
+                    companyHasGoodLevelOfReturnOnEquity(fundamentalStockEntity.returnOnEquity!!),
+                    companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(fundamentalStockEntity.cagrFiveYears!!),
+                    companyHasGoodNetMarginLevel(fundamentalStockEntity.netMargin!!),
+                    companyHasGoodNetMarginLajir(fundamentalStockEntity.marginLajir!!),
+                    companyHasGoodLevelCurrentLiquidity(fundamentalStockEntity.currentLiquidity!!),
+                    companyHasGoodLevelNetDebitOverNetEquity(fundamentalStockEntity.netDebitOverNetEquity!!),
+                    companyHasGoodLevelPriceOnBookValue(fundamentalStockEntity.priceOnBookValue!!),
+                    companyHasGoodLevelLiabilitiesOverAssets(fundamentalStockEntity.liabilitiesOverAssets!!),
+                    fundamentalStockEntity.company,
+                    fundamentalStockEntity.operationSegment
+                )
+            }
+
         }
-        val responseDTO = ResponseDTO.parseMapToDto(
-            br.com.company.stock.client.StockWebClient(configuration).getContentFromAPI(ticker)
-        )
+
+        val responseDTO =
+            ResponseDTO.parseMapToDto(
+                br.com.company.stock.client.StockWebClient(configuration).getContentByFirstExternalAPI(ticker)
+            )
+
         val indicatorsTicker = responseDTO.indicatorsTicker
         val otherIndicators = responseDTO.otherIndicators
         val valuation = responseDTO.valuation
@@ -109,7 +117,8 @@ class StockService(
         val netMargin = getDoubleValue(company?.margemLiquida.toString())
         val returnOnEquity = getDoubleValue(company?.roe.toString())
         val cagrFiveYears = getDoubleValue(company?.lucros_Cagr5.toString())
-        val sectorOfActivity = company?.setor_Atuacao_clean.toString()
+        val sectorOfActivity = company?.setor_Atuacao.toString()
+        val segmentOfActivity = company?.segmento_Atuacao.toString()
         val companyIsInJudicialRecovery = company?.injudicialProcess.toString().toBoolean()
         val currentLiquidity = getDoubleValue(company?.liquidezCorrente.toString())
         val netDebitOverNetEquity = getDoubleValue(company?.dividaliquida_PatrimonioLiquido.toString())
@@ -133,6 +142,7 @@ class StockService(
             returnOnInvestedCapital,
             cagrFiveYears,
             sectorOfActivity,
+            segmentOfActivity,
             companyIsInJudicialRecovery,
             currentLiquidity,
             netDebitOverNetEquity,
@@ -159,7 +169,7 @@ class StockService(
             companyHasGoodLevelPriceOnBookValue(fundamentalStockEntity.priceOnBookValue!!),
             companyHasGoodLevelLiabilitiesOverAssets(fundamentalStockEntity.liabilitiesOverAssets!!),
             fundamentalStockEntity.company,
-            fundamentalStockEntity.operationSegment
+            fundamentalStockEntity.segmentOfActivity
         )
 
     }
@@ -179,7 +189,8 @@ class StockService(
     private fun companyHasGoodLevelOfReturnOnEquity(returnOnEquity: Double) =
         returnOnEquity.compareTo(configuration.minimoROE.toDouble()) >= 1
 
-    private fun companyIsInPerennialSector(sector: String) = configuration.setoresParenes.contains(sector)
+    private fun companyIsInPerennialSector(sector: String) =
+        configuration.setoresParenes.contains(sector)
 
     private fun companyHasGoodNetMarginLevel(netMargin: Double) =
         netMargin.compareTo(configuration.minimoMargemLiquida.toDouble()) >= 1
