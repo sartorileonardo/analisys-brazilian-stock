@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
 
+private const val DEFAULT_VALUE = "0"
+
 @Service
 class StockService(
     val configuration: StockParametersConfig,
@@ -84,22 +86,22 @@ class StockService(
         val paper = responseDTO.paper
         val alternativesIndicators = paper?.indicadores
         val alternativeIndicatorPVP =
-            if (alternativesIndicators?.get(1)?.Value_F == null) ValueUtils.getDoubleValue(valuation?.pvp.toString()) else ValueUtils.getDoubleValue(
-                alternativesIndicators.get(1).Value_F!!
+            if (alternativesIndicators?.get(1)?.Value_F == null) ValueUtils.getDoubleValue(valuation?.pvp ?: DEFAULT_VALUE) else ValueUtils.getDoubleValue(
+                alternativesIndicators.get(1).Value_F!! ?: DEFAULT_VALUE
             )
         val priceOnBookValue = ValueUtils.getDoubleValue(
             listOfNotNull(indicatorsTicker?.pvp, alternativeIndicatorPVP, valuation?.pvp).distinct().first().toString()
         )
         val company = responseDTO.company
-        val netMargin = ValueUtils.getDoubleValue(company?.margemLiquida.toString())
-        val returnOnEquity = ValueUtils.getDoubleValue(company?.roe.toString())
-        val cagrFiveYears = ValueUtils.getDoubleValue(company?.lucros_Cagr5.toString())
-        val sectorOfActivity = company?.setor_Atuacao_clean.toString()
+        val netMargin = ValueUtils.getDoubleValue(company?.margemLiquida ?: DEFAULT_VALUE)
+        val returnOnEquity = ValueUtils.getDoubleValue(company?.roe ?: DEFAULT_VALUE)
+        val cagrFiveYears = ValueUtils.getDoubleValue(company?.lucros_Cagr5 ?: DEFAULT_VALUE)
+        val sectorOfActivity = company?.setor_Atuacao_clean ?: "Indefinido"
         val companyIsInJudicialRecovery = company?.injudicialProcess.toString().toBoolean()
-        val currentLiquidity = ValueUtils.getDoubleValue(company?.liquidezCorrente.toString())
-        val netDebitOverNetEquity = ValueUtils.getDoubleValue(company?.dividaliquida_PatrimonioLiquido.toString())
-        val liabilitiesOverAssets = ValueUtils.getDoubleValue(responseDTO.otherIndicators?.passivosAtivos.toString())
-        val marginLajir = ValueUtils.getDoubleValue(responseDTO.otherIndicators?.margemEbit.toString())
+        val currentLiquidity = ValueUtils.getDoubleValue(company?.liquidezCorrente ?: DEFAULT_VALUE)
+        val netDebitOverNetEquity = ValueUtils.getDoubleValue(company?.dividaliquida_PatrimonioLiquido ?: DEFAULT_VALUE)
+        val liabilitiesOverAssets = ValueUtils.getDoubleValue(responseDTO.otherIndicators?.passivosAtivos ?: DEFAULT_VALUE)
+        val marginLajir = ValueUtils.getDoubleValue(responseDTO.otherIndicators?.margemEbit ?: DEFAULT_VALUE)
 
         return StockAnalisysDTO(
             ticker,

@@ -1,10 +1,10 @@
 config:
 
   setoresParenes: [
-    "utilidade-publica",
-    "materiais-basicos",
-    "financeiro-e-outros",
-    "saude" ]
+    "Utilidade Pública",
+    "Materiais Básicos",
+    "Financeiro e Outros",
+    "Saúde" ]
 
   minimoFreeFloat: 25.00
   minimoROE: 10.00
