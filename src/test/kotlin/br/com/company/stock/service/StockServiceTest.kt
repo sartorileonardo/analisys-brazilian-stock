@@ -1,17 +1,13 @@
 package br.com.company.stock.service
 
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.test.context.SpringBootTest
+import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito.*
+import org.mockito.junit.jupiter.MockitoExtension
 
-@SpringBootTest
-class StockServiceTest {
-
-    @BeforeEach
-    fun setUp() {
-        //TODO: init variables
-    }
+@ExtendWith(MockitoExtension::class)
+internal class StockServiceTest {
 
     @Test
     fun `Test getAnalisys when already exists in repository`() {

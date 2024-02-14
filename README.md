@@ -9,12 +9,16 @@
 https://analisys-brazilian-stock-front.vercel.app/
 
 ## Design Solution
-
 ![Design Solution](img/StockAnalisysDesignSolution.drawio.png)
 
 ## Run Application
-
 `mvn spring-boot:run`
+
+## Run all tests
+`mvn test`
+
+## Update all libs from project
+`mvn versions:use-latest-releases`
 
 ## Swagger localhost documentation
 
@@ -68,10 +72,10 @@ logging:
     ROOT: INFO
 ```
 
-## StockAnalisysDto.java
+## StockAnalisysDTO.java
 
 ```kotlin
-data class StockDTO(
+data class StockAnalisysDTO(
     val ticker: String,
     val estaEmSetorPerene: Boolean,
     val estaForaDeRecuperacaoJudicial: Boolean,
@@ -85,10 +89,10 @@ data class StockDTO(
     val possuiBomNivelPassivosSobreAtivos: Boolean,
     val nomeEmpresa: String? = null,
     val segmentoEmpresa: String? = null,
-    val avaliacaoGeral: AvaliacaoGeral? = null
+    val score: Score? = null
 ) {
-    override fun toString(): String{
-        return "StockDTO(\"ticker\":\"${ticker}\",\"estaEmSetorPerene\":${estaEmSetorPerene},\"estaForaDeRecuperacaoJudicial\":${estaForaDeRecuperacaoJudicial},\"possuiBomNivelRetornoSobrePatrimonio\":${possuiBomNivelRetornoSobrePatrimonio},\"possuiBomNivelCrescimentoLucroNosUltimos5Anos\":${possuiBomNivelCrescimentoLucroNosUltimos5Anos},\"possuiBomNivelMargemLiquida\":${possuiBomNivelMargemLiquida},\"possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo\":${possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo},\"possuiBomNivelDividaLiquidaSobrePatrimonioLiquido\":${possuiBomNivelDividaLiquidaSobrePatrimonioLiquido},\"possuiBomPrecoEmRelacaoAoValorPatrimonial\":${possuiBomPrecoEmRelacaoAoValorPatrimonial},\"nomeEmpresa\":\"${nomeEmpresa}\",\"segmentoEmpresa\":\"${segmentoEmpresa}\",\"avaliacaoGeral\":\"${avaliacaoGeral.toString()}\")"
+    override fun toString(): String {
+        return "StockDTO(\"ticker\":\"${ticker}\",\"estaEmSetorPerene\":${estaEmSetorPerene},\"estaForaDeRecuperacaoJudicial\":${estaForaDeRecuperacaoJudicial},\"possuiBomNivelRetornoSobrePatrimonio\":${possuiBomNivelRetornoSobrePatrimonio},\"possuiBomNivelCrescimentoLucroNosUltimos5Anos\":${possuiBomNivelCrescimentoLucroNosUltimos5Anos},\"possuiBomNivelMargemLiquida\":${possuiBomNivelMargemLiquida},\"possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo\":${possuiBomNivelDeCapacidadeDeQuitarDividaNoCurtoPrazo},\"possuiBomNivelDividaLiquidaSobrePatrimonioLiquido\":${possuiBomNivelDividaLiquidaSobrePatrimonioLiquido},\"possuiBomPrecoEmRelacaoAoValorPatrimonial\":${possuiBomPrecoEmRelacaoAoValorPatrimonial},\"nomeEmpresa\":\"${nomeEmpresa}\",\"segmentoEmpresa\":\"${segmentoEmpresa}\",\"avaliacaoGeral\":\"${score.toString()}\")"
     }
 }
 ```
@@ -125,30 +129,44 @@ class StockController @Autowired constructor(val service: StockService) {
 @AutoConfigureMockMvc
 class StockControllerTest(@Autowired val mockMvc: MockMvc) {
     private val urlValidApi: String = "/stock/analisys/"
-    private val urlInvalidApi: String = "/stock/analisys/ticker"
+    private val urlInvalidApi: String = "/stock/analisys/ticker/"
     private val exampleValidTicker: String = "ABEV3"
     private val exampleInvalidTicker: String = "ABEVV"
-    private val exampleNotFoundTicker: String = "ABEV5"
-
+    private val exampleNotExistTicker: String = "ABEV6"
 
     @Test
-    fun findAnalisysWhenReturnIs200Code() {
-        mockMvc.perform(get("${urlValidApi}${exampleValidTicker}")
-            .contentType(MediaType.APPLICATION_JSON))
+    fun findAnalisysWhenUrlValidApiAndExampleValidTickerReturnIs200Code() {
+        mockMvc.perform(
+            get("${urlValidApi}${exampleValidTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isOk)
     }
 
     @Test
-    fun findAnalisysWhenReturnIs400Code(){
-        mockMvc.perform(get("${urlValidApi}${exampleInvalidTicker}")
-            .contentType(MediaType.APPLICATION_JSON))
+    fun findAnalisysWhenInvalidTickerReturnIs400Code() {
+        mockMvc.perform(
+            get("${urlValidApi}${exampleInvalidTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isBadRequest)
     }
 
     @Test
-    fun findAnalisysWhenReturnIs404Code(){
-        mockMvc.perform(get("${urlInvalidApi}${exampleValidTicker}")
-            .contentType(MediaType.APPLICATION_JSON))
+    fun findAnalisysWhenNotExistTickerReturnIs400Code() {
+        mockMvc.perform(
+            get("${urlValidApi}${exampleNotExistTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    fun findAnalisysWhenUrlInvalidApiReturnIs404Code() {
+        mockMvc.perform(
+            get("${urlInvalidApi}${exampleValidTicker}")
+                .contentType(MediaType.APPLICATION_JSON)
+        )
             .andExpect(status().isNotFound)
     }
 
@@ -159,24 +177,32 @@ class StockControllerTest(@Autowired val mockMvc: MockMvc) {
 
 ```kotlin
 class TickerValidation {
-    fun validarTicker(ticker: String): Boolean {
-        return validarSeForVazio(ticker)
-            .and(validarSePossuiSomenteNumeros(ticker))
-            .and(validarSePossuiSomenteNumeros(ticker))
-            .and(validarSePossuiSomenteLetras(ticker))
-            .and(validarSeTerminaComDigitoAceito(ticker))
-            .and(validarSeForBDR(ticker))
+    companion object {
+        fun validateTicker(ticker: String): Boolean {
+            return validateIfEmpty(ticker.trim()).and(validateIfContainsOnlyNumbers(ticker))
+                .and(validateIfContainsOnlyLetters(ticker)).and(validateIfFinishedWithAcceptedNumber(ticker))
+                .and(validateIfIsBDR(ticker))
+        }
+
+        private fun validateIfIsBDR(ticker: String) = if (listOf(
+                "32", "33", "34", "35"
+            ).contains(ticker.substring(ticker.length - 2))
+        ) throw BusinessException("O sistema não suporta ticker de BDR's, tente novamente com um ticker de empresa brasileira!") else true
+
+        private fun validateIfFinishedWithAcceptedNumber(ticker: String) = if (!listOf("3", "4").contains(
+                ticker.last().toString()
+            ) && ticker.substring(ticker.length - 2) != "11"
+        ) throw BusinessException("Ticker deve terminar com 3, 4 ou 11, exemplo: ABEV3, BBDC4, TAEE11!") else true
+
+        private fun validateIfContainsOnlyLetters(ticker: String) =
+            if (ticker.matches(Regex("^[a-zA-Z]+\$"))) throw BusinessException("Ticker não pode ser somente letras!") else true
+
+        private fun validateIfContainsOnlyNumbers(ticker: String) =
+            if (ticker.matches(Regex("\\d+"))) throw BusinessException("Ticker não pode ser somente numeros!") else true
+
+        private fun validateIfEmpty(ticker: String) =
+            if (ticker.isBlank()) throw BusinessException("Ticker é obrigatório!") else true
     }
 
-    private fun validarSeForBDR(ticker: String) = if(listOf("32", "33", "34", "35").contains(ticker.substring(ticker.length - 2))) throw BusinessException("O sistema não suporta ticker de BDR's, tente novamente com um ticker de empresa brasileira!") else true
-
-    private fun validarSeTerminaComDigitoAceito(ticker: String) = if(!listOf("3", "4").contains(ticker.last().toString()) && ticker.substring(ticker.length - 2) != "11")
-        throw BusinessException("Ticker deve terminar com 3, 4 ou 11, exemplo: ABEV3, BBDC4, TAEE11!") else true
-
-    private fun validarSePossuiSomenteLetras(ticker: String) = if(ticker.matches(Regex("^[a-zA-Z]+\$"))) throw BusinessException("Ticker não pode ser somente letras!") else true
-
-    private fun validarSePossuiSomenteNumeros(ticker: String) = if(ticker.matches(Regex("\\d+"))) throw BusinessException("Ticker não pode ser somente numeros!") else true
-
-    private fun validarSeForVazio(ticker: String) = if(ticker.isNullOrBlank()) throw BusinessException("Ticker é obrigatório!") else true
 }
 ```

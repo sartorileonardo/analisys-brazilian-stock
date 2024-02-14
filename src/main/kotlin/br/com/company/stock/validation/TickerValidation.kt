@@ -30,5 +30,4 @@ class TickerValidation {
             if (ticker.isBlank()) throw BusinessException("Ticker é obrigatório!") else true
     }
 
-
 }
