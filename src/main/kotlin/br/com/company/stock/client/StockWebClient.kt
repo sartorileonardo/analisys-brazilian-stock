@@ -15,18 +15,10 @@ class StockWebClient(
     private val config: StockParametersConfig
 ) {
 
-    private fun getResponseByFirstExternalAPI(ticker: String): String? {
-        val completeUrl = "${config.urlFirstExternalAPI}${ticker.toLowerCase()}/"
+    private fun getResponseByExternalAPI(ticker: String): String? {
+        val completeUrl = "${config.urlExternalAPI}${ticker.toLowerCase()}/"
         val webClient =
             WebClient.create().mutate().codecs { it.defaultCodecs().maxInMemorySize(16 * 1024 * 1024) }.build()
-        val responseJson = getResponse(webClient, completeUrl)
-        return responseJson
-    }
-
-    private fun getResponseBySecondExternalAPI(ticker: String): String? {
-        val completeUrl = "${config.urlSecondExternalAPI}"
-        val webClient =
-            WebClient.create(completeUrl)
         val responseJson = getResponse(webClient, completeUrl)
         return responseJson
     }
@@ -47,9 +39,9 @@ class StockWebClient(
         .timeout(Duration.ofMillis(config.timeoutExternalAPI.toLong()))
         .block()
 
-    fun getContentByFirstExternalAPI(ticker: String): Map<String, Objects> {
+    fun getContentFromAPI(ticker: String): Map<String, Objects> {
         val props = ObjectMapper().readValue(
-            getResponseByFirstExternalAPI(ticker)!!.substringAfter(
+            getResponseByExternalAPI(ticker)!!.substringAfter(
                 "<script id=\"__NEXT_DATA__\" type=\"application/json\">",
                 "</script>"
             ),
@@ -60,7 +52,7 @@ class StockWebClient(
 
     fun getContentBySecondExternalAPI(ticker: String): Map<String, Objects> {
         val props = ObjectMapper().readValue(
-            getResponseBySecondExternalAPI(ticker)!!,
+            getResponseByExternalAPI(ticker)!!,
             Map::class.java
         ).get("list") as Map<String, Objects>
         return props

@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import reactor.core.publisher.Mono
 
+private const val DEFAULT_VALUE = "0"
+
 @Service
 class StockService(
     val configuration: StockParametersConfig,
@@ -98,78 +100,45 @@ class StockService(
 
         val responseDTO =
             ResponseDTO.parseMapToDto(
-                br.com.company.stock.client.StockWebClient(configuration).getContentByFirstExternalAPI(ticker)
+                br.com.company.stock.client.StockWebClient(configuration).getContentFromAPI(ticker)
             )
-
         val indicatorsTicker = responseDTO.indicatorsTicker
         val otherIndicators = responseDTO.otherIndicators
         val valuation = responseDTO.valuation
         val paper = responseDTO.paper
         val alternativesIndicators = paper?.indicadores
         val alternativeIndicatorPVP =
-            if (alternativesIndicators?.get(1)?.Value_F == null) getDoubleValue(valuation?.pvp.toString()) else getDoubleValue(
-                alternativesIndicators.get(1).Value_F!!
+            if (alternativesIndicators?.get(1)?.Value_F == null) getDoubleValue(valuation?.pvp ?: DEFAULT_VALUE) else getDoubleValue(
+                alternativesIndicators.get(1).Value_F!! ?: DEFAULT_VALUE
             )
         val priceOnBookValue = getDoubleValue(
             listOfNotNull(indicatorsTicker?.pvp, alternativeIndicatorPVP, valuation?.pvp).distinct().first().toString()
         )
         val company = responseDTO.company
-        val netMargin = getDoubleValue(company?.margemLiquida.toString())
-        val returnOnEquity = getDoubleValue(company?.roe.toString())
-        val cagrFiveYears = getDoubleValue(company?.lucros_Cagr5.toString())
-        val sectorOfActivity = company?.setor_Atuacao.toString()
-        val segmentOfActivity = company?.segmento_Atuacao.toString()
+        val netMargin = getDoubleValue(company?.margemLiquida ?: DEFAULT_VALUE)
+        val returnOnEquity = getDoubleValue(company?.roe ?: DEFAULT_VALUE)
+        val cagrFiveYears = getDoubleValue(company?.lucros_Cagr5 ?: DEFAULT_VALUE)
+        val sectorOfActivity = company?.setor_Atuacao ?: "Indefinido"
         val companyIsInJudicialRecovery = company?.injudicialProcess.toString().toBoolean()
-        val currentLiquidity = getDoubleValue(company?.liquidezCorrente.toString())
-        val netDebitOverNetEquity = getDoubleValue(company?.dividaliquida_PatrimonioLiquido.toString())
-        val liabilitiesOverAssets = getDoubleValue(responseDTO.otherIndicators?.passivosAtivos.toString())
-        val marginLajir = getDoubleValue(responseDTO.otherIndicators?.margemEbit.toString())
-
-        val priceProfit = getDoubleValue(indicatorsTicker!!.preco_lucro!!)
-        val priceLajir = getDoubleValue(responseDTO.otherIndicators!!.pEbit!!)
-        val priceSalesRatio = getDoubleValue(valuation!!.psr!!)
-        val priceOnAssets = getDoubleValue(valuation.pAtivos!!)
-        val returnOnAssets = getDoubleValue(valuation.roa!!)
-        val returnOnInvestedCapital = getDoubleValue(company?.roic!!)
-        val evLajir = getDoubleValue(valuation.evEbitda!!)
-
-        val fundamentalStockEntity = fundamentalService.saveFundamentalStock(
-            ticker,
-            company?.bookName.toString(),
-            netMargin,
-            returnOnEquity,
-            returnOnAssets,
-            returnOnInvestedCapital,
-            cagrFiveYears,
-            sectorOfActivity,
-            segmentOfActivity,
-            companyIsInJudicialRecovery,
-            currentLiquidity,
-            netDebitOverNetEquity,
-            liabilitiesOverAssets,
-            marginLajir,
-            priceOnBookValue,
-            priceProfit,
-            priceLajir,
-            priceSalesRatio,
-            priceOnAssets,
-            evLajir
-        ).block()!!
+        val currentLiquidity = getDoubleValue(company?.liquidezCorrente ?: DEFAULT_VALUE)
+        val netDebitOverNetEquity = getDoubleValue(company?.dividaliquida_PatrimonioLiquido ?: DEFAULT_VALUE)
+        val liabilitiesOverAssets = getDoubleValue(responseDTO.otherIndicators?.passivosAtivos ?: DEFAULT_VALUE)
+        val marginLajir = getDoubleValue(responseDTO.otherIndicators?.margemEbit ?: DEFAULT_VALUE)
 
         return StockAnalisysDTO(
-            fundamentalStockEntity.ticker,
-            companyIsInPerennialSector(fundamentalStockEntity.sectorOfActivity!!),
-            companyIsNotInJudicialRecovery(fundamentalStockEntity.companyIsInJudicialRecovery!!),
-            companyHasGoodLevelOfReturnOnEquity(fundamentalStockEntity.returnOnEquity!!),
-            companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(fundamentalStockEntity.cagrFiveYears!!),
-            companyHasGoodNetMarginLevel(fundamentalStockEntity.netMargin!!),
-            companyHasGoodNetMarginLajir(fundamentalStockEntity.marginLajir!!),
-            companyHasGoodLevelCurrentLiquidity(fundamentalStockEntity.currentLiquidity!!),
-            companyHasGoodLevelNetDebitOverNetEquity(fundamentalStockEntity.netDebitOverNetEquity!!),
-            companyHasGoodLevelPriceOnBookValue(fundamentalStockEntity.priceOnBookValue!!),
-            companyHasGoodLevelLiabilitiesOverAssets(fundamentalStockEntity.liabilitiesOverAssets!!),
-            fundamentalStockEntity.company,
-            fundamentalStockEntity.segmentOfActivity
+            ticker,
+            companyIsInPerennialSector(sectorOfActivity),
+            companyIsNotInJudicialRecovery(companyIsInJudicialRecovery),
+            companyHasGoodLevelOfReturnOnEquity(returnOnEquity),
+            companyHasGoodLevelOfProfitGrowthInTheLastFiveYears(cagrFiveYears),
+            companyHasGoodNetMarginLevel(netMargin),
+            companyHasGoodNetMarginLajir(marginLajir),
+            companyHasGoodLevelCurrentLiquidity(currentLiquidity),
+            companyHasGoodLevelNetDebitOverNetEquity(netDebitOverNetEquity),
+            companyHasGoodLevelPriceOnBookValue(priceOnBookValue),
+            companyHasGoodLevelLiabilitiesOverAssets(liabilitiesOverAssets),
+            company?.bookName,
+            company?.segmento_Atuacao
         )
 
     }

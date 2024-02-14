@@ -16,8 +16,7 @@ class StockParametersConfig {
     lateinit var maximoDividaLiquidaSobreEbitda: String
     lateinit var maximoPrecoSobreLucro: String
     lateinit var maximoPrecoSobreValorPatrimonial: String
-    lateinit var urlFirstExternalAPI: String
-    lateinit var urlSecondExternalAPI: String
+    lateinit var urlExternalAPI: String
     lateinit var urlDatabase: String
     lateinit var databaseName: String
     lateinit var timeoutDatabase: String
