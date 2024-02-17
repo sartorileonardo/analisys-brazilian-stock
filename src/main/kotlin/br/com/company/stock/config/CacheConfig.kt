@@ -21,10 +21,10 @@ class CacheConfig(
     companion object {
         var LOGGER: Logger? = LoggerFactory.getLogger(CacheConfig::class.java)
     }
-    @Scheduled(fixedRate = 300000000)
+    @Scheduled(cron = "0 0 0 */3 * *") // Runs at midnight on the first day of every 3rd month
     fun clearCache() {
         cacheManager.getCache("analisys")?.clear()
         cacheManager.getCache("fundamentals")?.clear()
-        LOGGER?.info("Cache cleared from keys 'analisys' and 'fundamentals'")
+        LOGGER?.info("Memory cache was cleaned!")
     }
 }
