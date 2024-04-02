@@ -44,7 +44,7 @@ class DatabaseConfig(
             .retryReads(true)
             .build()
         val mongoClient = MongoClients.create(settings)
-        val database = mongoClient.getDatabase(databaseName)
+        mongoClient.getDatabase(databaseName)
         return mongoClient
     }
 

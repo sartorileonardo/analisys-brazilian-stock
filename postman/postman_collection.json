@@ -1,52 +1,90 @@
 {
-  "info": {
-    "_postman_id": "e96d59b6-6210-4eb3-a6f0-6712745f54a8",
-    "name": "Analisys Brazilian Stocks",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-  },
-  "item": [
-    {
-      "name": "Get localhost analisys",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:8888/stock/analisys/abev3",
-          "protocol": "http",
-          "host": [
-            "localhost"
-          ],
-          "port": "8888",
-          "path": [
-            "stock",
-            "analisys",
-            "abev3"
-          ]
-        }
-      },
-      "response": []
-    },
-    {
-      "name": "Get heroku analisys",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "https://analisys-brazilian-stock.herokuapp.com/stock/analisys/abev3",
-          "protocol": "https",
-          "host": [
-            "analisys-brazilian-stock",
-            "herokuapp",
-            "com"
-          ],
-          "path": [
-            "stock",
-            "analisys",
-            "abev3"
-          ]
-        }
-      },
-      "response": []
-    }
-  ]
+	"info": {
+		"_postman_id": "e96d59b6-6210-4eb3-a6f0-6712745f54a8",
+		"name": "Analisys Brazilian Stocks",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "1002496"
+	},
+	"item": [
+		{
+			"name": "Get backend cloud",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 to get backend cloud\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 3000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"});",
+							"pm.test(\"Ticker is present in response\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"VALE3\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://analisys-brazilian-stock-36da1af9e42b.herokuapp.com/stock/analisys/VALE3",
+					"protocol": "https",
+					"host": [
+						"analisys-brazilian-stock-36da1af9e42b",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"stock",
+						"analisys",
+						"VALE3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get frontend cloud",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 to get backend cloud\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"pm.test(\"Response time is less than 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://analisys-brazilian-stock-front.vercel.app/",
+					"protocol": "https",
+					"host": [
+						"analisys-brazilian-stock-front",
+						"vercel",
+						"app"
+					],
+					"path": [
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	]
 }

@@ -41,10 +41,12 @@ class FundamentalService(
         priceOnAssets: Double?,
         evLajir: Double?
     ): Mono<FundamentalStockEntity> {
-        if (fundamentalStockEntityExist(ticker)) {
-            if (!isFundamentalExpired(getTodayDate(), findById(ticker).block()!!.createDate!!)) {
-                return findById(ticker)
-            }
+        if (fundamentalStockEntityExist(ticker) && !isFundamentalExpired(
+                getTodayDate(),
+                findById(ticker).block()!!.createDate!!
+            )
+        ) {
+            return findById(ticker)
         }
         val today = getTodayDate()
         val fundamentalStockEntity = FundamentalStockEntity(

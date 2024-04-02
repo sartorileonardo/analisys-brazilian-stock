@@ -14,8 +14,18 @@ https://analisys-brazilian-stock-front.vercel.app/
 ## Run Application
 `mvn spring-boot:run`
 
-## Run all tests
+## Run all tests with maven
 `mvn test`
+
+## Run all tests with newman
+### If you don't have newman installed, install it with npm:
+`npm install -g newman`
+`npm install -g newman-reporter-htmlextra`
+### Run all testes with newman
+`newman run postman/postman_collection.json`
+### Run all testes with newman report
+`newman run postman/postman_collection.json -r cli,htmlextra --reporter-htmlextra-export ./postman/report_postman_collection.html
+`
 
 ## Update all libs from project
 `mvn versions:use-latest-releases`

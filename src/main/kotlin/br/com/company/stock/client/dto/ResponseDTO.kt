@@ -1,7 +1,6 @@
 package br.com.company.stock.client.dto
 
 import com.google.gson.GsonBuilder
-import java.util.*
 
 data class ResponseDTO(
     val valuation: ValuationDTO? = null,
@@ -15,8 +14,8 @@ data class ResponseDTO(
     val isNegotiationActive: Boolean
 ) {
     companion object {
-        fun parseMapToDto(map: Map<String, Objects>): ResponseDTO {
-            return map.mapTo()
+        fun parseMapToDto(map: Map<*, *>?): ResponseDTO {
+            return map!!.mapTo()
         }
 
         inline fun <reified ResponseDTO : Any> Any.mapTo(): ResponseDTO = GsonBuilder().create().run {
