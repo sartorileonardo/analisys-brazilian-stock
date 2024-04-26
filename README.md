@@ -26,12 +26,10 @@ https://analisys-brazilian-stock-front.vercel.app/
 ### Run all testes with newman report
 `newman run postman/postman_collection.json -r cli,htmlextra --reporter-htmlextra-export ./postman/report_postman_collection.html
 `
-
 ## Update all libs from project
 `mvn versions:use-latest-releases`
 
 ## Swagger localhost documentation
-
 `http://localhost:8888/swagger-ui/index.html#`
 
 ## Swagger heroku documentation

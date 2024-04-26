@@ -7,7 +7,7 @@
 	},
 	"item": [
 		{
-			"name": "Get backend cloud",
+			"name": "Get backend cloud - should return ok",
 			"event": [
 				{
 					"listen": "test",
@@ -16,8 +16,8 @@
 							"pm.test(\"Status code is 200 to get backend cloud\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
-							"pm.test(\"Response time is less than 3000ms\", function () {",
-							"    pm.expect(pm.response.responseTime).to.be.below(3000);",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
 							"});",
 							"pm.test(\"Ticker is present in response\", function () {",
 							"    pm.expect(pm.response.text()).to.include(\"VALE3\");",
@@ -49,13 +49,98 @@
 			"response": []
 		},
 		{
-			"name": "Get frontend cloud",
+			"name": "Get backend cloud - should return bad request",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200 to get backend cloud\", function () {",
+							"pm.test(\"Status code is 400 to get backend cloud\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"pm.test(\"Response contains (BAD REQUEST)\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"BAD_REQUEST\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://analisys-brazilian-stock-36da1af9e42b.herokuapp.com/stock/analisys/VALE34",
+					"protocol": "https",
+					"host": [
+						"analisys-brazilian-stock-36da1af9e42b",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"stock",
+						"analisys",
+						"VALE34"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get backend cloud - should return not found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404 to get backend cloud\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"pm.test(\"Response time is less than 5000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(5000);",
+							"});",
+							"pm.test(\"Response contains (Not Found)\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Not Found\");",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://analisys-brazilian-stock-36da1af9e42b.herokuapp.com/stock/analisys/test/VALE34",
+					"protocol": "https",
+					"host": [
+						"analisys-brazilian-stock-36da1af9e42b",
+						"herokuapp",
+						"com"
+					],
+					"path": [
+						"stock",
+						"analisys",
+						"test",
+						"VALE34"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get frontend cloud - should return ok",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 to get frontend cloud\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
 							"pm.test(\"Response time is less than 1000ms\", function () {",

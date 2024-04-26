@@ -5,8 +5,10 @@ import br.com.company.stock.exception.BusinessException
 class TickerValidation {
     companion object {
         fun validateTicker(ticker: String): Boolean {
-            return validateIfEmpty(ticker.trim()).and(validateIfContainsOnlyNumbers(ticker))
-                .and(validateIfContainsOnlyLetters(ticker)).and(validateIfFinishedWithAcceptedNumber(ticker))
+            return validateIfEmpty(ticker.trim())
+                .and(validateIfContainsOnlyNumbers(ticker))
+                .and(validateIfContainsOnlyLetters(ticker))
+                .and(validateIfFinishedWithAcceptedNumber(ticker))
                 .and(validateIfIsBDR(ticker))
         }
 

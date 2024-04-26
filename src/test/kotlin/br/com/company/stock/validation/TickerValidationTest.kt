@@ -1,8 +1,9 @@
 package br.com.company.stock.validation
 
 import br.com.company.stock.exception.BusinessException
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.Assertions.*
 
 class TickerValidationTest {
 
