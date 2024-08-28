@@ -80,5 +80,5 @@ server:
 
 logging:
   level:
-    ROOT: INFO
+    ROOT: WARN
 
