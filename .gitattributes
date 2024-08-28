@@ -1,4 +1,6 @@
-
 *.kt linguist-language=Kotlin
-
 *.kts linguist-language=Kotlin
+*.html linguist-vendored
+*.css linguist-vendored
+*.js linguist-vendored
+*.xml linguist-vendored
