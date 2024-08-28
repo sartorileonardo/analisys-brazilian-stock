@@ -5,8 +5,11 @@
 # Demo
 ![Demo](img/demo-analisys-brazilian-stock.gif)
 
-# Deployed to Vercel (front)
+# Deployed to Vercel (frontend)
 https://analisys-brazilian-stock-front.vercel.app/
+
+# Deploy to Vercel (backend)
+https://analisys-brazilian-stock-36da1af9e42b.herokuapp.com/swagger-ui/index.html#/stock-controller
 
 ## Design Solution
 ![Design Solution](img/StockAnalisysDesignSolution.drawio.png)
