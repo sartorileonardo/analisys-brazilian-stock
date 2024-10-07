@@ -2,6 +2,9 @@
 
 > Spring boot with Kotlin, Spring Boot, Cache, WebClient, Swagger and Heroku Cloud
 
+# What is it?
+Open project created to search for publicly traded companies and carry out a type of evaluation/classification with the sole objective of studying the technologies involved in their development.
+
 # Demo
 ![Demo](img/demo-analisys-brazilian-stock.gif)
 
