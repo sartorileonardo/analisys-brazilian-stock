@@ -11,8 +11,8 @@ Open project created to search for publicly traded companies and carry out a typ
 # Deployed to Vercel (frontend)
 https://analisys-brazilian-stock-front.vercel.app/
 
-# Deploy to Vercel (backend)
-https://analisys-brazilian-stock-36da1af9e42b.herokuapp.com/swagger-ui/index.html#/stock-controller
+# Deploy to AWS (backend)
+[Swagger Micro Service API](http://ec2-3-89-4-103.compute-1.amazonaws.com:8888/swagger-ui/index.html#/stock-controller/getAnalisysUsingGET)
 
 ## Design Solution
 ![Design Solution](img/StockAnalisysDesignSolution.drawio.png)
